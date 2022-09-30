@@ -11,7 +11,7 @@ import 'package:rss_tts/main.dart';
 
 // ignore: use_key_in_widget_constructors
 class NavBar extends StatelessWidget {
-  void navigateRoute(String? origin, String destination, BuildContext context) {
+  navigateRoute(String? origin, String destination, BuildContext context) {
     if (origin == destination) {
       Navigator.pop(context);
     } else {
@@ -21,7 +21,7 @@ class NavBar extends StatelessWidget {
     }
   }
 
-  void exitApp() {
+  exitApp() {
     if (Platform.isAndroid) {
       SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     } else if (Platform.isIOS) {}
@@ -39,8 +39,7 @@ class NavBar extends StatelessWidget {
             decoration: BoxDecoration(
                 color: Colors.blue,
                 image: DecorationImage(
-                  image: NetworkImage(
-                      'https://wallpaperaccess.com/full/1261770.jpg'),
+                  image: AssetImage('images/navbarBackground.jpg'),
                   fit: BoxFit.cover,
                 )),
           ),
