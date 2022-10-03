@@ -1,0 +1,2 @@
+Aljazerra,https://www.aljazeera.com/xml/rss/all.xml
+Malaysia Kini,https://www.malaysiakini.com/rss/en/news.rss 

@@ -6,20 +6,19 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
-class AljaZeera extends StatefulWidget {
-  const AljaZeera({super.key, required this.title});
+class NewsFeed extends StatefulWidget {
+  const NewsFeed({super.key, required this.title, required this.feedUrl});
   final String title;
+  final String feedUrl;
   @override
-  State<AljaZeera> createState() => _AljaZeeraState();
+  State<NewsFeed> createState() => _NewsFeedState();
 }
 
-class _AljaZeeraState extends State<AljaZeera> {
-  static const String FEED_URL = 'https://www.aljazeera.com/xml/rss/all.xml';
+class _NewsFeedState extends State<NewsFeed> {
   late RssFeed _feed;
   late String _title;
   static const String loadingFeedMsg = 'Loading Feed. . .';
   static const String feedLoadErr = 'Error Loading Feed';
-  late GlobalKey<RefreshIndicatorState> _refreshKey;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
 
   updateTitle(title) {
@@ -31,20 +30,19 @@ class _AljaZeeraState extends State<AljaZeera> {
   Future<RssFeed?> loadFeed() async {
     try {
       final client = http.Client();
-      final response = await client.get(Uri.parse(FEED_URL));
+      final response = await client.get(Uri.parse(widget.feedUrl));
       return RssFeed.parse(response.body);
     } catch (e) {}
     return null;
   }
 
-  load() async {
+  load() {
     loadFeed().then((result) {
       if (null == result || result.toString().isEmpty) {
         updateTitle(feedLoadErr);
         return;
       }
       updateFeed(result);
-      updateTitle(_feed.title);
     });
   }
 
@@ -57,9 +55,7 @@ class _AljaZeeraState extends State<AljaZeera> {
   @override
   void initState() {
     super.initState();
-    _refreshKey = GlobalKey<RefreshIndicatorState>();
     updateTitle(widget.title);
-    load();
   }
 
   newsTitle(title) {
@@ -101,32 +97,26 @@ class _AljaZeeraState extends State<AljaZeera> {
     );
   }
 
-  isFeedEmpty() {
-    return null == _feed || null == _feed.items;
-  }
-
-  body() {
-    return isFeedEmpty()
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
-        : RefreshIndicator(
-            key: _refreshKey,
-            child: listNews(),
-            onRefresh: () => load(),
-          );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavBar(),
-      appBar: AppBar(
-        title: Text(_title),
-      ),
-      body: Center(
-        child: body(),
-      ),
-    );
+        appBar: AppBar(
+          title: Text(_title),
+        ),
+        body: FutureBuilder(
+          future: load(),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Center(child: CircularProgressIndicator());
+              default:
+                if (snapshot.hasError) {
+                  return Center(child: Text('An Unexpected Error has Occured'));
+                } else {
+                  return listNews();
+                }
+            }
+          },
+        ));
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rss_tts/NavBar.dart';
-import 'package:rss_tts/AljaZeera.dart';
+import 'package:rss_tts/RSS_Feed.dart';
 import 'package:rss_tts/Settings.dart';
+import 'package:rss_tts/rss_mainmenu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(brightness: Brightness.dark),
       initialRoute: '/home',
       routes: {
-        '/home': (context) => const AljaZeera(title: 'RSS TTS App'),
+        '/home': (context) => const RSS_mainmenu(),
         '/settings': (context) => const Settings(),
       },
     );
