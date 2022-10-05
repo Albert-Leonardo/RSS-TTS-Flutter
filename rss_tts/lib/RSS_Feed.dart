@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rss_tts/NavBar.dart';
+import 'package:rss_tts/WebView.dart';
 import 'package:webfeed/webfeed.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -31,19 +32,10 @@ class _NewsFeedState extends State<NewsFeed> {
     try {
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.feedUrl));
+      _feed = RssFeed.parse(response.body);
       return RssFeed.parse(response.body);
     } catch (e) {}
     return null;
-  }
-
-  load() {
-    loadFeed().then((result) {
-      if (null == result || result.toString().isEmpty) {
-        updateTitle(feedLoadErr);
-        return;
-      }
-      updateFeed(result);
-    });
   }
 
   updateFeed(feed) {
@@ -90,7 +82,9 @@ class _NewsFeedState extends State<NewsFeed> {
           ),
           contentPadding: EdgeInsets.all(5.0),
           onTap: () {
-            //
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) =>
+                    WebView(title: item.title, newsUrl: item.link)));
           },
         );
       },
@@ -104,7 +98,7 @@ class _NewsFeedState extends State<NewsFeed> {
           title: Text(_title),
         ),
         body: FutureBuilder(
-          future: load(),
+          future: loadFeed(),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.waiting:

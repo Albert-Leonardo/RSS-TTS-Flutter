@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.rss_tts">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="rss_tts"
         android:name="${applicationName}"
