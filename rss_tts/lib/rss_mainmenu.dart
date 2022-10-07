@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:http/http.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:rss_tts/RSS_Feed.dart';
 import 'package:webfeed/domain/rss_feed.dart';
@@ -11,24 +11,15 @@ import 'package:webfeed/domain/rss_feed.dart';
 class newsRSS {
   String newsTitle = '';
   String newsUrl = '';
-  newsRSS(a, b) {
+  bool enable = false;
+  newsRSS(a, b, c) {
     newsTitle = a;
     newsUrl = b;
+    enable = c;
   }
 }
 
 List<newsRSS> rssList = [];
-readRSS() async {
-  String response;
-  response = await rootBundle.loadString('text/rss.txt');
-  LineSplitter ls = new LineSplitter();
-  List<String> responseSplit = ls.convert(response);
-  for (int i = 0; i < responseSplit.length; i++) {
-    final splitNames = responseSplit[i].split(',');
-    print(splitNames);
-    rssList.add(newsRSS(splitNames[0], splitNames[1]));
-  }
-}
 
 newsRSSBuilder() {
   return ListView.builder(
@@ -59,6 +50,19 @@ _SaveAndBack() {
 class RSS_mainmenu extends StatelessWidget {
   const RSS_mainmenu({super.key});
 
+  readRSS(List<newsRSS> rssList) async {
+    String response;
+    response = await rootBundle.loadString('text/rss.txt');
+    LineSplitter ls = new LineSplitter();
+    List<String> responseSplit = ls.convert(response);
+    for (int i = 0; i < responseSplit.length; i++) {
+      final splitNames = responseSplit[i].split(',');
+      print(splitNames);
+      rssList.add(newsRSS(
+          splitNames[0], splitNames[1], splitNames[2].toLowerCase() == 'true'));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -69,7 +73,7 @@ class RSS_mainmenu extends StatelessWidget {
               title: Text("Main Menu"),
             ),
             body: FutureBuilder(
-              future: readRSS(),
+              future: readRSS(rssList),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
