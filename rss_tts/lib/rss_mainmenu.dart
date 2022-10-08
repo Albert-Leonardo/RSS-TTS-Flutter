@@ -80,6 +80,13 @@ class RSS_mainmenu extends StatelessWidget {
       try {
         print("exists");
         String contents = await file.readAsString();
+        if (contents == '') {
+          print("no entry");
+          String s =
+              "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true";
+          await writeFile(s);
+          return s;
+        }
 
         return contents;
       } catch (e) {

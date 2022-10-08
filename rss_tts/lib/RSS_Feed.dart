@@ -28,13 +28,15 @@ class _NewsFeedState extends State<NewsFeed> {
     });
   }
 
-  Future<RssFeed?> loadFeed() async {
+  Future loadFeed() async {
     try {
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.feedUrl));
       _feed = RssFeed.parse(response.body);
       return RssFeed.parse(response.body);
-    } catch (e) {}
+    } catch (e) {
+      throw new FormatException('thrown-error');
+    }
     return null;
   }
 

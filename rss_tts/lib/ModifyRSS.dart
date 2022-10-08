@@ -18,6 +18,9 @@ class ModifyRSS extends StatefulWidget {
 }
 
 class _ModifyRSSState extends State<ModifyRSS> {
+  late TextEditingController nameController = TextEditingController();
+  late TextEditingController urlController = TextEditingController();
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -70,27 +73,76 @@ class _ModifyRSSState extends State<ModifyRSS> {
   }
 
   updateRssFile(List<newsRSS> rssList) async {
-    final filename = 'test.pdf';
-    var bytes = await rootBundle.load('text/rss.txt');
     String builder = '';
     for (int i = 0; i < rssList.length; i++) {
-      builder += rssList[i].newsTitle +
-          ',' +
-          rssList[i].newsUrl +
-          ',' +
-          rssList[i].enable.toString() +
-          "\n";
+      builder +=
+          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()}\n';
     }
     print(builder);
 
     writeFile(builder);
   }
 
-  editRssDialog() => showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-            title: Text('Edit RSS'),
-          ));
+  Future editRssDialog(int index) async {
+    nameController.text = rssList[index].newsTitle;
+    urlController.text = rssList[index].newsUrl;
+    return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Edit RSS'),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Website name:',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                TextField(
+                  decoration: InputDecoration(hintText: 'Website name'),
+                  controller: nameController,
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Website url:',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                TextField(
+                  decoration: InputDecoration(hintText: 'Website Url'),
+                  controller: urlController,
+                )
+              ]),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      rssList.removeAt(index);
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'DELETE',
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    )),
+                TextButton(
+                    onPressed: () {
+                      rssList[index].newsTitle = nameController.text;
+                      rssList[index].newsUrl = urlController.text;
+                      nameController.clear();
+                      urlController.clear();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('CONFIRM')),
+              ],
+            ));
+  }
 
   modRSS() {
     return ListView.builder(
@@ -100,8 +152,11 @@ class _ModifyRSSState extends State<ModifyRSS> {
           return CheckboxListTile(
             secondary: IconButton(
               icon: Icon(Icons.edit),
-              onPressed: () {
-                editRssDialog();
+              onPressed: () async {
+                await editRssDialog(index);
+                setState(() {
+                  updateRssFile(rssList);
+                });
               },
             ),
             title: Text(rssList[index].newsTitle),
@@ -126,24 +181,34 @@ class _ModifyRSSState extends State<ModifyRSS> {
     return WillPopScope(
         onWillPop: _popUp(),
         child: Scaffold(
-            appBar: AppBar(
-              title: Text("Edit RSS"),
-            ),
-            body: FutureBuilder(
-              future: readRSS(rssList),
-              builder: (context, snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                    return Center(child: CircularProgressIndicator());
-                  default:
-                    if (snapshot.hasError) {
-                      return Center(
-                          child: Text('An Unexpected Error has Occured'));
-                    } else {
-                      return modRSS();
-                    }
-                }
-              },
-            )));
+          appBar: AppBar(
+            title: Text("Edit RSS"),
+          ),
+          body: FutureBuilder(
+            future: readRSS(rssList),
+            builder: (context, snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return Center(child: CircularProgressIndicator());
+                default:
+                  if (snapshot.hasError) {
+                    return Center(
+                        child: Text('An Unexpected Error has Occured'));
+                  } else {
+                    return modRSS();
+                  }
+              }
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              setState(() {
+                rssList.add(newsRSS('', '', false));
+                updateRssFile(rssList);
+              });
+            },
+          ),
+        ));
   }
 }
