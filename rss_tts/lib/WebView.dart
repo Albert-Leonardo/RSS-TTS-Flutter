@@ -32,6 +32,9 @@ class _WebViewState extends State<WebView> {
         body: Stack(
           children: [
             InAppWebView(
+              initialOptions: InAppWebViewGroupOptions(
+                  crossPlatform:
+                      InAppWebViewOptions(transparentBackground: true)),
               initialUrlRequest:
                   URLRequest(url: Uri.parse(stringConverter(widget.newsUrl))),
               onWebViewCreated: (InAppWebViewController controller) {

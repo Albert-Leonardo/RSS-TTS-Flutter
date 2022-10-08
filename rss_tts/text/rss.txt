@@ -1,3 +1,0 @@
-Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true
-MalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true
-United Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true

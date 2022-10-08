@@ -204,7 +204,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
             child: const Icon(Icons.add),
             onPressed: () {
               setState(() {
-                rssList.add(newsRSS('', '', false));
+                rssList.add(newsRSS('', '', true));
                 updateRssFile(rssList);
               });
             },
