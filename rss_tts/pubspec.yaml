@@ -45,6 +45,8 @@ dependencies:
   flutter_inappwebview:
   flutter_settings_screens:
   path_provider:
+  html:
+  flutter_tts:
 
 dev_dependencies:
   flutter_test:

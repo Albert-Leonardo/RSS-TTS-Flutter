@@ -38,8 +38,7 @@ newsRSSBuilder() {
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => NewsFeed(
-                        title: rssList[index].newsTitle,
-                        feedUrl: rssList[index].newsUrl,
+                        rss: rssList[index],
                       )));
             },
           );

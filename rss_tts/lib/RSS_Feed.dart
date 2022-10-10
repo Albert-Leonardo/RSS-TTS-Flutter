@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:rss_tts/WebView.dart';
+import 'package:rss_tts/rss_mainmenu.dart';
 import 'package:webfeed/webfeed.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -8,9 +9,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 class NewsFeed extends StatefulWidget {
-  const NewsFeed({super.key, required this.title, required this.feedUrl});
-  final String title;
-  final String feedUrl;
+  const NewsFeed({super.key, required this.rss});
+  final newsRSS rss;
   @override
   State<NewsFeed> createState() => _NewsFeedState();
 }
@@ -31,7 +31,7 @@ class _NewsFeedState extends State<NewsFeed> {
   Future loadFeed() async {
     try {
       final client = http.Client();
-      final response = await client.get(Uri.parse(widget.feedUrl));
+      final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
       return RssFeed.parse(response.body);
     } catch (e) {
@@ -49,7 +49,7 @@ class _NewsFeedState extends State<NewsFeed> {
   @override
   void initState() {
     super.initState();
-    updateTitle(widget.title);
+    updateTitle(widget.rss.newsTitle);
   }
 
   newsTitle(title) {
@@ -85,8 +85,11 @@ class _NewsFeedState extends State<NewsFeed> {
           contentPadding: EdgeInsets.all(5.0),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) =>
-                    WebView(title: item.title, newsUrl: item.link)));
+                builder: (context) => WebView(
+                      title: item.title,
+                      newsUrl: item.link,
+                      rss: widget.rss,
+                    )));
           },
         );
       },
