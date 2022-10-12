@@ -32,7 +32,7 @@ class _WebViewState extends State<WebView> {
 
   speak(String text) async {
     await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.setLanguage('en-US');
+    await flutterTts.setLanguage('en-UN');
     await flutterTts.setPitch(1);
     await flutterTts.speak(text);
   }
@@ -57,6 +57,7 @@ class _WebViewState extends State<WebView> {
   int ttsIndex = 0;
   bool checkPlay = true;
   bool playerVisibility = true;
+  bool startRSS = true;
   queryString() {
     if (widget.rss.newsUrl.contains('aljazeera'))
       return 'div > p';
@@ -75,8 +76,11 @@ class _WebViewState extends State<WebView> {
         .map((e) => e.innerHtml.trim())
         .toList();
     print('Count: ${news.length}');
-    for (final p in news) {
-      TTS.add(p.replaceAll(RegExp(r"<\\?.*?>"), ""));
+    for (String p in news) {
+      p = p.replaceAll(RegExp(r"<\\?.*?>"), "");
+      print(p);
+      final pp = p.split('.');
+      TTS = TTS + pp;
     }
     print(TTS);
   }
@@ -127,8 +131,11 @@ class _WebViewState extends State<WebView> {
                   }
                 }
                 */
-                    if (progress > 70) {
-                      player();
+                    if (startRSS) {
+                      if (progress > 50) {
+                        player();
+                        startRSS = false;
+                      }
                     }
                     setState(() {
                       _progress = progress / 100;
@@ -200,7 +207,7 @@ class _WebViewState extends State<WebView> {
                   ),
                 if (!playerVisibility)
                   Align(
-                      alignment: Alignment.bottomCenter,
+                      alignment: Alignment.bottomRight,
                       child: Container(
                           width: 50,
                           height: 50,
