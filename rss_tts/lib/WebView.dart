@@ -7,17 +7,14 @@ import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:rss_tts/rss_mainmenu.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:webfeed/domain/rss_feed.dart';
 
 class WebView extends StatefulWidget {
-  const WebView(
-      {super.key,
-      required this.title,
-      required this.newsUrl,
-      required this.rss});
-  final String? title;
-  final String? newsUrl;
+  WebView(
+      {super.key, required this.rss, required this.feed, required this.index});
   final newsRSS rss;
-
+  final int index;
+  RssFeed feed;
   @override
   State<WebView> createState() => _WebViewState();
 }
@@ -41,6 +38,19 @@ class _WebViewState extends State<WebView> {
     await flutterTts.stop();
   }
 
+  nextPage() {
+    checkPlay = false;
+    player();
+    Navigator.pop(context);
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => WebView(
+              rss: widget.rss,
+              feed: widget.feed,
+              index: widget.index + 1,
+            )));
+    checkPlay = true;
+  }
+
   player() async {
     while (ttsIndex < TTS.length) {
       if (checkPlay == true) {
@@ -49,6 +59,9 @@ class _WebViewState extends State<WebView> {
       } else if (checkPlay == false) {
         stopSpeak();
         break;
+      }
+      if (ttsIndex == TTS.length) {
+        nextPage();
       }
     }
   }
@@ -59,16 +72,17 @@ class _WebViewState extends State<WebView> {
   bool playerVisibility = true;
   bool startRSS = true;
   queryString() {
-    if (widget.rss.newsUrl.contains('aljazeera'))
-      return 'div > p';
-    else if (widget.rss.newsUrl.contains('news.un.org'))
+    if (widget.rss.newsUrl.contains('aljazeera')) {
+      return 'main > div > ul > li, div > p ';
+    } else if (widget.rss.newsUrl.contains('news.un.org'))
       return 'div > div > div > div > div > div > div > div > div > div > div > div > div > div > div > div > p:';
     else
       return 'p';
   }
 
   Future getWebsiteData() async {
-    final url = Uri.parse(stringConverter(widget.newsUrl));
+    final url =
+        Uri.parse(stringConverter(widget.feed.items![widget.index].link));
     final response = await http.get(url);
     dom.Document html = dom.Document.html(response.body);
     final news = html
@@ -99,7 +113,8 @@ class _WebViewState extends State<WebView> {
         onWillPop: _popUp(),
         child: Scaffold(
             appBar: AppBar(
-              title: Text(stringConverter(widget.title)),
+              title:
+                  Text(stringConverter(widget.feed.items![widget.index].title)),
             ),
             body: Stack(
               children: [
@@ -108,7 +123,8 @@ class _WebViewState extends State<WebView> {
                       crossPlatform:
                           InAppWebViewOptions(transparentBackground: true)),
                   initialUrlRequest: URLRequest(
-                      url: Uri.parse(stringConverter(widget.newsUrl))),
+                      url: Uri.parse(stringConverter(
+                          widget.feed.items![widget.index].link))),
                   onWebViewCreated: (InAppWebViewController controller) {
                     print("Lollllllllllll");
                     getWebsiteData();
@@ -169,14 +185,6 @@ class _WebViewState extends State<WebView> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           IconButton(
-                            iconSize: 62.0,
-                            color: Colors.blue,
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.skip_previous,
-                            ),
-                          ),
-                          IconButton(
                               icon: Icon(
                                   checkPlay ? Icons.pause : Icons.play_arrow),
                               iconSize: 62.0,
@@ -188,10 +196,27 @@ class _WebViewState extends State<WebView> {
                                 });
                               }),
                           IconButton(
-                              icon: Icon(Icons.skip_next),
-                              iconSize: 62.0,
-                              color: Colors.blue,
-                              onPressed: () {}),
+                            iconSize: 62.0,
+                            color: Colors.blue,
+                            onPressed: () {
+                              checkPlay = false;
+                              player();
+                              ttsIndex++;
+                              checkPlay = true;
+                              player();
+                            },
+                            icon: Icon(
+                              Icons.fast_forward,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.skip_next),
+                            iconSize: 62.0,
+                            color: Colors.blue,
+                            onPressed: () {
+                              nextPage();
+                            },
+                          ),
                           IconButton(
                               icon: Icon(Icons.keyboard_arrow_down),
                               iconSize: 62.0,

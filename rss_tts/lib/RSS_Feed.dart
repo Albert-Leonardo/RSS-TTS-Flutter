@@ -86,9 +86,9 @@ class _NewsFeedState extends State<NewsFeed> {
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => WebView(
-                      title: item.title,
-                      newsUrl: item.link,
                       rss: widget.rss,
+                      feed: _feed,
+                      index: index,
                     )));
           },
         );
