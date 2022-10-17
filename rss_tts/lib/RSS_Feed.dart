@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:rss_tts/WebView.dart';
 import 'package:rss_tts/rss_mainmenu.dart';
@@ -16,6 +20,59 @@ class NewsFeed extends StatefulWidget {
 }
 
 class _NewsFeedState extends State<NewsFeed> {
+  late List<String> viewed;
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/viewed.txt');
+  }
+
+  Future<File> writeFile(String s) async {
+    final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
+  Future<String> readFile() async {
+    File file = await _localFile;
+    if (await file.exists()) {
+      try {
+        print("exists");
+        String contents = await file.readAsString();
+        return contents;
+      } catch (e) {
+        // If encountering an error, return 0
+        return '0';
+      }
+    } else {
+      print("no exists");
+      String s = "";
+      await writeFile(s);
+      return s;
+    }
+  }
+
+  checkViewed() async {
+    String s = await readFile();
+    LineSplitter ls = new LineSplitter();
+    List<String> responseSplit = ls.convert(s);
+    viewed = responseSplit;
+  }
+
+  writeViewed() {
+    String s = '';
+    for (String ss in viewed) {
+      s += ss + '\n';
+    }
+    return s;
+  }
+
   late RssFeed _feed;
   late String _title;
   static const String loadingFeedMsg = 'Loading Feed. . .';
@@ -33,6 +90,7 @@ class _NewsFeedState extends State<NewsFeed> {
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
+      await checkViewed();
       return RssFeed.parse(response.body);
     } catch (e) {
       throw new FormatException('thrown-error');
@@ -77,6 +135,9 @@ class _NewsFeedState extends State<NewsFeed> {
         final item = _feed.items![index];
         return ListTile(
           title: newsTitle(item.title),
+          textColor: viewed.contains(item.link)
+              ? Color.fromARGB(255, 188, 132, 237)
+              : Theme.of(context).textTheme.bodyText2?.color,
           subtitle: newsDate(dateFormat.format(item.pubDate as DateTime)),
           trailing: Icon(
             Icons.keyboard_arrow_right,
@@ -90,6 +151,10 @@ class _NewsFeedState extends State<NewsFeed> {
                       feed: _feed,
                       index: index,
                     )));
+            setState(() {
+              viewed.add(item.link as String);
+              writeFile(writeViewed());
+            });
           },
         );
       },

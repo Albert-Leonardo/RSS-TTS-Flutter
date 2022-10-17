@@ -51,6 +51,19 @@ class _WebViewState extends State<WebView> {
     checkPlay = true;
   }
 
+  previousPage() {
+    checkPlay = false;
+    player();
+    Navigator.pop(context);
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => WebView(
+              rss: widget.rss,
+              feed: widget.feed,
+              index: widget.index - 1,
+            )));
+    checkPlay = true;
+  }
+
   player() async {
     while (ttsIndex < TTS.length) {
       if (checkPlay == true) {
@@ -71,6 +84,7 @@ class _WebViewState extends State<WebView> {
   bool checkPlay = true;
   bool playerVisibility = true;
   bool startRSS = true;
+
   queryString() {
     if (widget.rss.newsUrl.contains('aljazeera')) {
       return 'main > div > ul > li, div > p ';
@@ -93,7 +107,7 @@ class _WebViewState extends State<WebView> {
     for (String p in news) {
       p = p.replaceAll(RegExp(r"<\\?.*?>"), "");
       print(p);
-      final pp = p.split('.');
+      final pp = p.split('. ');
       TTS = TTS + pp;
     }
     print(TTS);
@@ -109,6 +123,7 @@ class _WebViewState extends State<WebView> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width / 9;
     return WillPopScope(
         onWillPop: _popUp(),
         child: Scaffold(
@@ -157,9 +172,6 @@ class _WebViewState extends State<WebView> {
                       _progress = progress / 100;
                     });
                   },
-                  onLoadStop: (controller, url) {
-                    //player();
-                  },
                 ),
                 _progress < 1
                     ? SizedBox(
@@ -185,9 +197,31 @@ class _WebViewState extends State<WebView> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           IconButton(
+                            icon: Icon(Icons.skip_previous),
+                            iconSize: screenWidth,
+                            color: Colors.blue,
+                            onPressed: () {
+                              if (widget.index >= 1) previousPage();
+                            },
+                          ),
+                          IconButton(
+                            iconSize: screenWidth,
+                            color: Colors.blue,
+                            onPressed: () {
+                              checkPlay = false;
+                              player();
+                              if (ttsIndex >= 1) ttsIndex--;
+                              checkPlay = true;
+                              player();
+                            },
+                            icon: Icon(
+                              Icons.fast_rewind,
+                            ),
+                          ),
+                          IconButton(
                               icon: Icon(
                                   checkPlay ? Icons.pause : Icons.play_arrow),
-                              iconSize: 62.0,
+                              iconSize: screenWidth + 10,
                               color: Colors.blue[800],
                               onPressed: () {
                                 setState(() {
@@ -196,7 +230,7 @@ class _WebViewState extends State<WebView> {
                                 });
                               }),
                           IconButton(
-                            iconSize: 62.0,
+                            iconSize: screenWidth,
                             color: Colors.blue,
                             onPressed: () {
                               checkPlay = false;
@@ -211,7 +245,7 @@ class _WebViewState extends State<WebView> {
                           ),
                           IconButton(
                             icon: Icon(Icons.skip_next),
-                            iconSize: 62.0,
+                            iconSize: screenWidth,
                             color: Colors.blue,
                             onPressed: () {
                               nextPage();
@@ -219,7 +253,7 @@ class _WebViewState extends State<WebView> {
                           ),
                           IconButton(
                               icon: Icon(Icons.keyboard_arrow_down),
-                              iconSize: 62.0,
+                              iconSize: screenWidth,
                               color: Colors.blue,
                               onPressed: () {
                                 setState(() {
