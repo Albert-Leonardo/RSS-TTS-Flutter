@@ -41,6 +41,7 @@ class _WebViewState extends State<WebView> {
   nextPage() {
     checkPlay = false;
     player();
+    checkPlay = true;
     Navigator.pop(context);
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => WebView(
@@ -54,6 +55,7 @@ class _WebViewState extends State<WebView> {
   previousPage() {
     checkPlay = false;
     player();
+    checkPlay = true;
     Navigator.pop(context);
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => WebView(
