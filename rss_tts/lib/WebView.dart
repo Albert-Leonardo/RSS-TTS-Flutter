@@ -25,6 +25,12 @@ stringConverter(String? s) {
 }
 
 class _WebViewState extends State<WebView> {
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    stopSpeak();
+  }
+
   final FlutterTts flutterTts = FlutterTts();
 
   speak(String text) async {
@@ -75,7 +81,7 @@ class _WebViewState extends State<WebView> {
         stopSpeak();
         break;
       }
-      if (ttsIndex == TTS.length) {
+      if (ttsIndex == TTS.length && TTS.length > 5) {
         nextPage();
       }
     }
