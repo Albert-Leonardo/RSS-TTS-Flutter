@@ -20,6 +20,7 @@ class NewsFeed extends StatefulWidget {
 }
 
 class _NewsFeedState extends State<NewsFeed> {
+  bool isNewest = true;
   late List<String> viewed;
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -108,6 +109,7 @@ class _NewsFeedState extends State<NewsFeed> {
   void initState() {
     super.initState();
     updateTitle(widget.rss.newsTitle);
+    setState(() {});
   }
 
   newsTitle(title) {
@@ -132,7 +134,9 @@ class _NewsFeedState extends State<NewsFeed> {
     return ListView.builder(
       itemCount: _feed.items?.length,
       itemBuilder: (BuildContext context, int index) {
-        final item = _feed.items![index];
+        final sortedItems =
+            isNewest ? _feed.items : _feed.items?.reversed.toList();
+        final item = sortedItems![index];
         return ListTile(
           title: newsTitle(item.title),
           textColor: viewed.contains(item.link)
@@ -149,8 +153,10 @@ class _NewsFeedState extends State<NewsFeed> {
                 builder: (context) => WebView(
                       rss: widget.rss,
                       feed: _feed,
-                      index: index,
+                      index: isNewest ? index : _feed.items!.length - index - 1,
+                      isNewest: isNewest,
                     )));
+
             setState(() {
               viewed.add(item.link as String);
               writeFile(writeViewed());
@@ -167,20 +173,39 @@ class _NewsFeedState extends State<NewsFeed> {
         appBar: AppBar(
           title: Text(_title),
         ),
-        body: FutureBuilder(
-          future: loadFeed(),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Center(child: CircularProgressIndicator());
-              default:
-                if (snapshot.hasError) {
-                  return Center(child: Text('An Unexpected Error has Occured'));
-                } else {
-                  return listNews();
+        body: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                  onPressed: () => setState(() => isNewest = !isNewest),
+                  icon: RotatedBox(
+                    quarterTurns: 1,
+                    child: Icon(Icons.compare_arrows, size: 28),
+                  ),
+                  label: Text(
+                    isNewest ? 'Newest' : 'Oldest',
+                    style: TextStyle(fontSize: 16),
+                  )),
+            ),
+            Expanded(
+                child: FutureBuilder(
+              future: loadFeed(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return Center(child: CircularProgressIndicator());
+                  default:
+                    if (snapshot.hasError) {
+                      return Center(
+                          child: Text('An Unexpected Error has Occured'));
+                    } else {
+                      return listNews();
+                    }
                 }
-            }
-          },
+              },
+            ))
+          ],
         ));
   }
 }
