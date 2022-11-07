@@ -14,10 +14,12 @@ class newsRSS {
   String newsTitle = '';
   String newsUrl = '';
   bool enable = false;
-  newsRSS(a, b, c) {
+  bool login = false;
+  newsRSS(a, b, c, d) {
     newsTitle = a;
     newsUrl = b;
     enable = c;
+    login = d;
   }
 }
 
@@ -82,7 +84,7 @@ class RSS_mainmenu extends StatelessWidget {
         if (contents == '') {
           print("no entry");
           String s =
-              "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true";
+              "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
           await writeFile(s);
           return s;
         }
@@ -95,7 +97,7 @@ class RSS_mainmenu extends StatelessWidget {
     } else {
       print("no exists");
       String s =
-          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true";
+          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
       await writeFile(s);
       return s;
     }
@@ -109,7 +111,10 @@ class RSS_mainmenu extends StatelessWidget {
     for (int i = 0; i < responseSplit.length; i++) {
       final splitNames = responseSplit[i].split(',');
       rssList.add(newsRSS(
-          splitNames[0], splitNames[1], splitNames[2].toLowerCase() == 'true'));
+          splitNames[0],
+          splitNames[1],
+          splitNames[2].toLowerCase() == 'true',
+          splitNames[3].toLowerCase() == 'true'));
     }
   }
 

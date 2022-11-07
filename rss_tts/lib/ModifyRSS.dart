@@ -20,6 +20,7 @@ class ModifyRSS extends StatefulWidget {
 class _ModifyRSSState extends State<ModifyRSS> {
   late TextEditingController nameController = TextEditingController();
   late TextEditingController urlController = TextEditingController();
+  late bool _checked;
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -54,7 +55,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
     } else {
       print("no exists");
       String s =
-          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true";
+          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
       await writeFile(s);
       return s;
     }
@@ -68,7 +69,10 @@ class _ModifyRSSState extends State<ModifyRSS> {
     for (int i = 0; i < responseSplit.length; i++) {
       final splitNames = responseSplit[i].split(',');
       rssList.add(newsRSS(
-          splitNames[0], splitNames[1], splitNames[2].toLowerCase() == 'true'));
+          splitNames[0],
+          splitNames[1],
+          splitNames[2].toLowerCase() == 'true',
+          splitNames[3].toLowerCase() == 'true'));
     }
   }
 
@@ -76,7 +80,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
     String builder = '';
     for (int i = 0; i < rssList.length; i++) {
       builder +=
-          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()}\n';
+          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()},${rssList[i].login.toString()}\n';
     }
     print(builder);
 
@@ -86,39 +90,54 @@ class _ModifyRSSState extends State<ModifyRSS> {
   Future editRssDialog(int index) async {
     nameController.text = rssList[index].newsTitle;
     urlController.text = rssList[index].newsUrl;
+    _checked = rssList[index].login;
     return showDialog(
         context: context,
         builder: (context) => AlertDialog(
+              content: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Column(mainAxisSize: MainAxisSize.min, children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Website name:',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    TextField(
+                      decoration: InputDecoration(hintText: 'Website name'),
+                      controller: nameController,
+                    ),
+                    const SizedBox(
+                      height: 32,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Website url:',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    TextField(
+                      decoration: InputDecoration(hintText: 'Website Url'),
+                      controller: urlController,
+                    ),
+                    CheckboxListTile(
+                      title: Text("Website with Login?"),
+                      controlAffinity: ListTileControlAffinity.platform,
+                      value: _checked,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _checked = value!;
+                        });
+                      },
+                    ),
+                  ]);
+                },
+              ),
               title: Text('Edit RSS'),
-              content: Column(mainAxisSize: MainAxisSize.min, children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Website name:',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                TextField(
-                  decoration: InputDecoration(hintText: 'Website name'),
-                  controller: nameController,
-                ),
-                const SizedBox(
-                  height: 32,
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Website url:',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                TextField(
-                  decoration: InputDecoration(hintText: 'Website Url'),
-                  controller: urlController,
-                )
-              ]),
               actions: [
                 TextButton(
                     onPressed: () {
@@ -135,6 +154,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
                     onPressed: () {
                       rssList[index].newsTitle = nameController.text;
                       rssList[index].newsUrl = urlController.text;
+                      rssList[index].login = _checked;
                       nameController.clear();
                       urlController.clear();
                       Navigator.of(context).pop();
@@ -204,7 +224,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
             child: const Icon(Icons.add),
             onPressed: () {
               setState(() {
-                rssList.add(newsRSS('', '', true));
+                rssList.add(newsRSS('', '', true, false));
                 updateRssFile(rssList);
               });
             },
