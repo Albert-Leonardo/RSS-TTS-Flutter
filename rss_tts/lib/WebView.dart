@@ -279,21 +279,6 @@ class _WebViewState extends State<WebView> {
                   },
                   onProgressChanged:
                       (InAppWebViewController controller, int progress) {
-                    /*if (progress >= 80) {
-                  print("Lol22222222222222222222");
-                  String? htmlString = '';
-                  controller.getHtml().then((value) => htmlString = value);
-                  dom.Document html = dom.Document.html(htmlString!);
-                  final news = html
-                      .querySelectorAll('p')
-                      .map((e) => e.innerHtml.trim())
-                      .toList();
-                  print('Count: ${news.length}');
-                  for (final title in news) {
-                    debugPrint(title);
-                  }
-                }
-                */
                     if (startRSS && !widget.rss.login) {
                       if (progress > 50) {
                         player();

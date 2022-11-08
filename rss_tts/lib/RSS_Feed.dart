@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:rss_tts/WebView.dart';
 import 'package:rss_tts/rss_mainmenu.dart';
+import 'dart:async';
 import 'package:webfeed/webfeed.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -105,11 +106,22 @@ class _NewsFeedState extends State<NewsFeed> {
     });
   }
 
+  String _now = '';
+  late Timer _everySecond;
+
   @override
   void initState() {
     super.initState();
     updateTitle(widget.rss.newsTitle);
-    setState(() {});
+    // sets first value
+    _now = DateTime.now().second.toString();
+
+    // defines a timer
+    _everySecond = Timer.periodic(Duration(seconds: 30), (Timer t) {
+      setState(() {
+        _now = DateTime.now().second.toString();
+      });
+    });
   }
 
   newsTitle(title) {
