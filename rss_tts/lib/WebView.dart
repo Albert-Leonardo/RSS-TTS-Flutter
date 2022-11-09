@@ -111,6 +111,7 @@ class _WebViewState extends State<WebView> {
     loadOnce = false;
     loadFinish = false;
     mainPage = 0;
+
     checkViewed();
   }
 
@@ -175,8 +176,12 @@ class _WebViewState extends State<WebView> {
         ttsIndex++;
         print("Index: " + ttsIndex.toString());
         print("TTSLENGTH: " + TTS.length.toString());
+        if (ttsIndex == TTS.length) {
+          print("NEXT PAGE!!!!");
+          nextPage();
+        }
 
-        if (canGoNext && ttsIndex == TTS.length) {
+        if (canGoNext && ttsIndex == TTS.length && widget.rss.login) {
           print("iaugysufdchgvhjbhuoasy8dg7fyucgvhjbsad");
           nextPage();
         }
@@ -278,9 +283,10 @@ class _WebViewState extends State<WebView> {
                     webView = controller;
                   },
                   onProgressChanged:
-                      (InAppWebViewController controller, int progress) {
-                    if (startRSS && !widget.rss.login) {
-                      if (progress > 50) {
+                      (InAppWebViewController controller, int progress) async {
+                    if (!widget.rss.login) {
+                      if (TTS[0].isNotEmpty && startRSS) {
+                        checkPlay = true;
                         player();
                         startRSS = false;
                       }
@@ -297,6 +303,7 @@ class _WebViewState extends State<WebView> {
                   onLoadStop: (controller, url) async {
                     checkPlay = true;
                     startRSS = true;
+                    canGoNext = true;
                     if (mainPage <= 2) {
                       if (widget.rss.login) {
                         print(
@@ -320,7 +327,7 @@ class _WebViewState extends State<WebView> {
                         print(
                             "=================================================");
                         print("TTS LENGTH:" + TTS.length.toString());
-                        canGoNext = true;
+
                         print(TTS);
 
                         if (loadOnce) {
