@@ -136,7 +136,7 @@ class _WebViewState extends State<WebView> {
 
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
-    widget.index++;
+    widget.index--;
     widget._controller!.loadUrl(
         urlRequest: URLRequest(
             url: Uri.parse(widget.feed.items![widget.index].link.toString())));
@@ -187,15 +187,16 @@ class _WebViewState extends State<WebView> {
 
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
-    widget.index--;
+    widget.index++;
     widget._controller!.loadUrl(
         urlRequest: URLRequest(
             url: Uri.parse(widget.feed.items![widget.index].link.toString())));
 
+    if (widget.rss.login) stopSpeak();
     stopSpeak();
     TTS = [];
     ttsIndex = 0;
-    if (!widget.rss.login) checkPlay = true;
+    checkPlay = true;
     playerVisibility = true;
     readed = 0;
     startRSS = true;
@@ -209,6 +210,7 @@ class _WebViewState extends State<WebView> {
     if (!widget.rss.login) getWebsiteData();
 
     print("CHANGED!!!");
+    if (widget.rss.login) stopSpeak();
     /*Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => WebView(
               rss: widget.rss,
@@ -220,11 +222,13 @@ class _WebViewState extends State<WebView> {
       saveNext();
       writeFile(writeViewed());
     });
-
     if (!widget.rss.login) {
       checkPlay = true;
       player();
+      print("Nologin");
     }
+    if (widget.rss.login) stopSpeak();
+    print("Nologin2");
     print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
   }
 
