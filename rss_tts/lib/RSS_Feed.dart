@@ -160,7 +160,7 @@ class _NewsFeedState extends State<NewsFeed> {
             size: 30.0,
           ),
           contentPadding: EdgeInsets.all(5.0),
-          onTap: () {
+          onTap: () async {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => WebView(
                       rss: widget.rss,

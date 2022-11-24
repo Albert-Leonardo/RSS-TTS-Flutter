@@ -3,10 +3,25 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:rss_tts/RSS_Feed.dart';
 import 'package:rss_tts/Settings.dart';
+import 'package:rss_tts/WebView.dart';
 import 'package:rss_tts/rss_mainmenu.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 Future main() async {
   await Settings.init(cacheProvider: SharePreferenceCache());
+  final androidConfig = FlutterBackgroundAndroidConfig(
+    notificationTitle: "flutter_background example app",
+    notificationText:
+        "Background notification for keeping the example app running in the background",
+    notificationImportance: AndroidNotificationImportance.Default,
+    notificationIcon: AndroidResource(
+        name: 'background_icon',
+        defType: 'drawable'), // Default is ic_launcher from folder mipmap
+  );
+  bool hasPermissions = await FlutterBackground.hasPermissions;
+  bool success =
+      await FlutterBackground.initialize(androidConfig: androidConfig);
+  bool successs = await FlutterBackground.enableBackgroundExecution();
   runApp(const MyApp());
 }
 

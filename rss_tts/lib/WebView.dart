@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rss_tts/NavBar.dart';
@@ -22,9 +23,10 @@ class WebView extends StatefulWidget {
       required this.index,
       required this.isNewest});
   final newsRSS rss;
-  final int index;
+  int index;
   RssFeed feed;
   final bool isNewest;
+  InAppWebViewController? _controller;
   @override
   State<WebView> createState() => _WebViewState();
 }
@@ -89,11 +91,11 @@ class _WebViewState extends State<WebView> {
   }
 
   saveNext() {
-    viewed.add(widget.feed.items![widget.index + 1].link as String);
+    viewed.add(widget.feed.items![widget.index].link as String);
   }
 
   savePrevious() {
-    viewed.add(widget.feed.items![widget.index - 1].link as String);
+    viewed.add(widget.feed.items![widget.index].link as String);
   }
 
   @override
@@ -133,40 +135,97 @@ class _WebViewState extends State<WebView> {
     player();
 
     checkPlay = true;
+    print("PUSHHHHHHHHHHHHHHHH!");
+    widget.index++;
+    widget._controller!.loadUrl(
+        urlRequest: URLRequest(
+            url: Uri.parse(widget.feed.items![widget.index].link.toString())));
 
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
+    if (widget.rss.login) stopSpeak();
+    stopSpeak();
+    TTS = [];
+    ttsIndex = 0;
+    checkPlay = true;
+    playerVisibility = true;
+    readed = 0;
+    startRSS = true;
+    canGoNext = false;
+    loadOnce = false;
+    loadFinish = false;
+    mainPage = 0;
+
+    checkViewed();
+
+    if (!widget.rss.login) getWebsiteData();
+
+    print("CHANGED!!!");
+    if (widget.rss.login) stopSpeak();
+    /*Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => WebView(
               rss: widget.rss,
               feed: widget.feed,
               index: widget.index + 1,
               isNewest: widget.isNewest,
-            )));
+            )));*/
     setState(() {
       saveNext();
       writeFile(writeViewed());
     });
-    checkPlay = true;
+    if (!widget.rss.login) {
+      checkPlay = true;
+      player();
+      print("Nologin");
+    }
+    if (widget.rss.login) stopSpeak();
+    print("Nologin2");
+    print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
   }
 
-  previousPage() {
+  previousPage() async {
     checkPlay = false;
     player();
-    checkPlay = true;
 
-    Navigator.pop(context);
-    setState(() {
-      savePrevious();
-      writeFile(writeViewed());
-    });
-    Navigator.of(context).push(MaterialPageRoute(
+    checkPlay = true;
+    print("PUSHHHHHHHHHHHHHHHH!");
+    widget.index--;
+    widget._controller!.loadUrl(
+        urlRequest: URLRequest(
+            url: Uri.parse(widget.feed.items![widget.index].link.toString())));
+
+    stopSpeak();
+    TTS = [];
+    ttsIndex = 0;
+    if (!widget.rss.login) checkPlay = true;
+    playerVisibility = true;
+    readed = 0;
+    startRSS = true;
+    canGoNext = false;
+    loadOnce = false;
+    loadFinish = false;
+    mainPage = 0;
+
+    checkViewed();
+
+    if (!widget.rss.login) getWebsiteData();
+
+    print("CHANGED!!!");
+    /*Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => WebView(
               rss: widget.rss,
               feed: widget.feed,
-              index: widget.index - 1,
+              index: widget.index + 1,
               isNewest: widget.isNewest,
-            )));
+            )));*/
+    setState(() {
+      saveNext();
+      writeFile(writeViewed());
+    });
 
-    checkPlay = true;
+    if (!widget.rss.login) {
+      checkPlay = true;
+      player();
+    }
+    print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
   }
 
   player() async {
@@ -204,6 +263,9 @@ class _WebViewState extends State<WebView> {
     }
   }
 
+  // ignore: deprecated_member_use
+  List<dom.Document> html =
+      List<dom.Document>.generate(1000, (index) => dom.Document.html(''));
   List<String> TTS = [];
   int ttsIndex = 0;
   bool checkPlay = true;
@@ -229,8 +291,9 @@ class _WebViewState extends State<WebView> {
       final url =
           Uri.parse(stringConverter(widget.feed.items![widget.index].link));
       final response = await http.get(url);
-      dom.Document html = dom.Document.html(response.body);
-      final news = html
+      html[widget.index] = dom.Document.html(response.body);
+      print("SUccessss");
+      final news = html[widget.index]
           .querySelectorAll(queryString())
           .map((e) => e.innerHtml.trim())
           .toList();
@@ -254,7 +317,6 @@ class _WebViewState extends State<WebView> {
   }
 
   double _progress = 0;
-  late InAppWebViewController webView;
   GlobalKey<ScaffoldState> scaffoldkey = GlobalKey<ScaffoldState>();
 
   @override
@@ -278,9 +340,9 @@ class _WebViewState extends State<WebView> {
                       url: Uri.parse(stringConverter(
                           widget.feed.items![widget.index].link))),
                   onWebViewCreated: (InAppWebViewController controller) async {
+                    widget._controller = controller;
                     print("Lollllllllllll");
                     await getWebsiteData();
-                    webView = controller;
                   },
                   onProgressChanged:
                       (InAppWebViewController controller, int progress) async {
@@ -291,6 +353,11 @@ class _WebViewState extends State<WebView> {
                         startRSS = false;
                       }
                     }
+                    if (widget.rss.login) {
+                      checkPlay = false;
+                      player();
+                    }
+
                     setState(() {
                       _progress = progress / 100;
                     });

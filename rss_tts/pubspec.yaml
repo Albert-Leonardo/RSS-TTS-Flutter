@@ -47,6 +47,8 @@ dependencies:
   path_provider:
   html:
   flutter_tts:
+  workmanager:
+  flutter_background:
 
 dev_dependencies:
   flutter_test:
