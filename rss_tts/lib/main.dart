@@ -18,10 +18,10 @@ Future main() async {
         name: 'background_icon',
         defType: 'drawable'), // Default is ic_launcher from folder mipmap
   );
-  bool hasPermissions = await FlutterBackground.hasPermissions;
-  bool success =
-      await FlutterBackground.initialize(androidConfig: androidConfig);
-  bool successs = await FlutterBackground.enableBackgroundExecution();
+  await FlutterBackground.hasPermissions;
+
+  await FlutterBackground.initialize(androidConfig: androidConfig);
+  await FlutterBackground.enableBackgroundExecution();
   runApp(const MyApp());
 }
 

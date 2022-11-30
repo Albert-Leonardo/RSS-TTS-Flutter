@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -76,6 +75,9 @@ class _WebViewState extends State<WebView> {
   }
 
   checkViewed() async {
+    if (!FlutterBackground.isBackgroundExecutionEnabled) {
+      await FlutterBackground.enableBackgroundExecution();
+    }
     String s = await readFile();
     LineSplitter ls = new LineSplitter();
     List<String> responseSplit = ls.convert(s);
@@ -133,13 +135,19 @@ class _WebViewState extends State<WebView> {
   nextPage() async {
     checkPlay = false;
     player();
-
+    setState(() {
+      saveNext();
+      writeFile(writeViewed());
+    });
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
-    widget.index--;
-    widget._controller!.loadUrl(
-        urlRequest: URLRequest(
-            url: Uri.parse(widget.feed.items![widget.index].link.toString())));
+    widget.index++;
+    setState(() {
+      widget._controller!.loadUrl(
+          urlRequest: URLRequest(
+              url:
+                  Uri.parse(widget.feed.items![widget.index].link.toString())));
+    });
 
     if (widget.rss.login) stopSpeak();
     stopSpeak();
@@ -167,10 +175,7 @@ class _WebViewState extends State<WebView> {
               index: widget.index + 1,
               isNewest: widget.isNewest,
             )));*/
-    setState(() {
-      saveNext();
-      writeFile(writeViewed());
-    });
+
     if (!widget.rss.login) {
       checkPlay = true;
       player();
@@ -187,10 +192,13 @@ class _WebViewState extends State<WebView> {
 
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
-    widget.index++;
-    widget._controller!.loadUrl(
-        urlRequest: URLRequest(
-            url: Uri.parse(widget.feed.items![widget.index].link.toString())));
+    widget.index--;
+    setState(() {
+      widget._controller!.loadUrl(
+          urlRequest: URLRequest(
+              url:
+                  Uri.parse(widget.feed.items![widget.index].link.toString())));
+    });
 
     if (widget.rss.login) stopSpeak();
     stopSpeak();
