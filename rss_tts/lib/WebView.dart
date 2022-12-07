@@ -20,7 +20,9 @@ class WebView extends StatefulWidget {
       required this.rss,
       required this.feed,
       required this.index,
-      required this.isNewest});
+      required this.isNewest,
+      required this.update});
+  final ValueChanged<int> update;
   final newsRSS rss;
   int index;
   RssFeed feed;
@@ -133,16 +135,22 @@ class _WebViewState extends State<WebView> {
   }
 
   nextPage() async {
+    if (widget.feed.items?.length == widget.index + 1) {
+      return null;
+    }
     checkPlay = false;
     player();
     setState(() {
       saveNext();
       writeFile(writeViewed());
     });
+    widget.update(100);
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
     widget.index++;
     setState(() {
+      stopSpeak();
+      checkPlay = true;
       widget._controller!.loadUrl(
           urlRequest: URLRequest(
               url:
@@ -189,7 +197,13 @@ class _WebViewState extends State<WebView> {
   previousPage() async {
     checkPlay = false;
     player();
-
+    setState(() {
+      stopSpeak();
+      checkPlay = true;
+      saveNext();
+      writeFile(writeViewed());
+    });
+    widget.update(100);
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
     widget.index--;
@@ -226,10 +240,7 @@ class _WebViewState extends State<WebView> {
               index: widget.index + 1,
               isNewest: widget.isNewest,
             )));*/
-    setState(() {
-      saveNext();
-      writeFile(writeViewed());
-    });
+
     if (!widget.rss.login) {
       checkPlay = true;
       player();

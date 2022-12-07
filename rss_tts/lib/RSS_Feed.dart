@@ -117,10 +117,11 @@ class _NewsFeedState extends State<NewsFeed> {
     _now = DateTime.now().second.toString();
 
     // defines a timer
-    _everySecond = Timer.periodic(Duration(seconds: 30), (Timer t) {
-      setState(() {
-        _now = DateTime.now().second.toString();
-      });
+  }
+
+  void _update(int count) {
+    setState(() {
+      _now = DateTime.now().second.toString();
     });
   }
 
@@ -167,6 +168,7 @@ class _NewsFeedState extends State<NewsFeed> {
                       feed: _feed,
                       index: isNewest ? index : _feed.items!.length - index - 1,
                       isNewest: isNewest,
+                      update: _update,
                     )));
 
             setState(() {
