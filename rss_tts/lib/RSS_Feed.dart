@@ -75,6 +75,21 @@ class _NewsFeedState extends State<NewsFeed> {
     return s;
   }
 
+  checkColor(RssItem item) {
+    DateTime d1 = item.pubDate as DateTime;
+    DateTime d2 = DateTime.now().subtract(const Duration(days: 1));
+    if (viewed.contains(item.link)) {
+      return Color.fromARGB(255, 188, 132, 237);
+    } else if (d1.isBefore(d2)) {
+      print(d1.toString());
+      print(d2.toString());
+      print("----------------------");
+      return Color.fromARGB(255, 207, 221, 51);
+    } else {
+      return Theme.of(context).textTheme.bodyText2?.color;
+    }
+  }
+
   late RssFeed _feed;
   late String _title;
   static const String loadingFeedMsg = 'Loading Feed. . .';
@@ -152,9 +167,7 @@ class _NewsFeedState extends State<NewsFeed> {
         final item = sortedItems![index];
         return ListTile(
           title: newsTitle(item.title),
-          textColor: viewed.contains(item.link)
-              ? Color.fromARGB(255, 188, 132, 237)
-              : Theme.of(context).textTheme.bodyText2?.color,
+          textColor: checkColor(item),
           subtitle: newsDate(dateFormat.format(item.pubDate as DateTime)),
           trailing: Icon(
             Icons.keyboard_arrow_right,

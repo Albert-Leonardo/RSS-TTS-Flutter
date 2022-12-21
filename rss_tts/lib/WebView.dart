@@ -260,12 +260,24 @@ class _WebViewState extends State<WebView> {
         print("TTSLENGTH: " + TTS.length.toString());
         if (ttsIndex == TTS.length) {
           print("NEXT PAGE!!!!");
-          nextPage();
+          if (widget.isNewest) {
+            print("NEwest!!");
+            if (!(widget.feed.items?.length == widget.index + 1)) nextPage();
+          } else {
+            print("OLDESTT!!");
+            if (widget.index >= 1) previousPage();
+          }
         }
 
         if (canGoNext && ttsIndex == TTS.length && widget.rss.login) {
           print("iaugysufdchgvhjbhuoasy8dg7fyucgvhjbsad");
-          nextPage();
+          if (widget.isNewest) {
+            print("NEwest!!");
+            if (!(widget.feed.items?.length == widget.index + 1)) nextPage();
+          } else {
+            print("OLDESTT!!");
+            if (widget.index >= 1) previousPage();
+          }
         }
       } /*else if (checkPlay == true && widget.rss.login) {
         if (loadFinish) {
@@ -391,6 +403,11 @@ class _WebViewState extends State<WebView> {
                     print("VISITEDDDDDDDDDDDDDDDDDDDD: " + mainPage.toString());
                   },
                   onLoadStop: (controller, url) async {
+                    setState(() {
+                      saveNext();
+                      writeFile(writeViewed());
+                    });
+                    widget.update(100);
                     checkPlay = true;
                     startRSS = true;
                     canGoNext = true;

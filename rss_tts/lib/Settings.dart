@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -8,7 +9,15 @@ import 'package:rss_tts/ModifyRSS.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+  static const keyDarkMode = 'key-dark-mode';
+  const SettingsPage({super.key});
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  var _time = 0.0;
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -26,9 +35,6 @@ class SettingsPage extends StatelessWidget {
     // Write the file
     return file.writeAsString(s);
   }
-
-  const SettingsPage({super.key});
-  static const keyDarkMode = 'key-dark-mode';
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +55,49 @@ class SettingsPage extends StatelessWidget {
       );
     }
 
+    Future editOldTime(BuildContext context) async {
+      return showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                content: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Column(mainAxisSize: MainAxisSize.min, children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Days :',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      StatefulBuilder(
+                        builder: (context, state) => Center(
+                          child: Slider(
+                            value: _time,
+                            onChanged: (val) {
+                              state(() {
+                                _time = val;
+                              });
+                            },
+                          ),
+                        ),
+                      )
+                    ]);
+                  },
+                ),
+                title: Text('Edit RSS'),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('CONFIRM')),
+                ],
+              ));
+    }
+
     Widget buildDarkMode() => SwitchSettingsTile(
-          settingKey: keyDarkMode,
+          settingKey: SettingsPage.keyDarkMode,
           leading: Icon(Icons.dark_mode),
           title: 'Dark mode',
           onChange: (isDarkMode) {},
@@ -63,6 +110,13 @@ class SettingsPage extends StatelessWidget {
           onTap: () => Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => ModifyRSS())),
         );
+    Widget modifyTime(BuildContext context) => SimpleSettingsTile(
+        title: 'Mark old feed color',
+        subtitle: '',
+        leading: Icon(Icons.timer),
+        onTap: () async {
+          await editOldTime(context);
+        });
     Widget clearViewedCacheSettings() => SimpleSettingsTile(
         title: 'Clear Viewed Cache',
         subtitle: '',
@@ -88,7 +142,8 @@ class SettingsPage extends StatelessWidget {
           ),
           SettingsGroup(title: "Rss Links", children: <Widget>[
             modifyRssSettings(),
-            clearViewedCacheSettings()
+            modifyTime(context),
+            clearViewedCacheSettings(),
           ])
         ],
       )),
