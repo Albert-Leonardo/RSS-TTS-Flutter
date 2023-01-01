@@ -34,6 +34,11 @@ class _NewsFeedState extends State<NewsFeed> {
     return File('$path/viewed.txt');
   }
 
+  Future<File> get _localFileSave async {
+    final path = await _localPath;
+    return File('$path/saved.txt');
+  }
+
   Future<File> writeFile(String s) async {
     final file = await _localFile;
 
@@ -41,8 +46,34 @@ class _NewsFeedState extends State<NewsFeed> {
     return file.writeAsString(s);
   }
 
+  Future<File> writeFileSave(String s) async {
+    final file = await _localFileSave;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
   Future<String> readFile() async {
     File file = await _localFile;
+    if (await file.exists()) {
+      try {
+        print("exists");
+        String contents = await file.readAsString();
+        return contents;
+      } catch (e) {
+        // If encountering an error, return 0
+        return '0';
+      }
+    } else {
+      print("no exists");
+      String s = "";
+      await writeFile(s);
+      return s;
+    }
+  }
+
+  Future<String> readFileSave() async {
+    File file = await _localFileSave;
     if (await file.exists()) {
       try {
         print("exists");
@@ -90,8 +121,31 @@ class _NewsFeedState extends State<NewsFeed> {
     }
   }
 
+  convertRssFeedToString(RssFeed _feed) {
+    String sb = '';
+
+    for (int i = 0; i < _feed.items!.length; i++) {
+      String title = _feed.items![i].title ?? 'title';
+      String url = _feed.items![i].link ?? 'url';
+      DateTime date = _feed.items![i].pubDate!;
+      String pubdate = DateFormat.yMd().add_jm().format(date);
+      sb = sb +
+          widget.rss.newsTitle +
+          ',' +
+          title +
+          ',' +
+          url +
+          ',' +
+          pubdate +
+          "\n";
+    }
+    print(sb);
+    return sb;
+  }
+
   late RssFeed _feed;
   late String _title;
+  late String _saved;
   static const String loadingFeedMsg = 'Loading Feed. . .';
   static const String feedLoadErr = 'Error Loading Feed';
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
@@ -108,6 +162,7 @@ class _NewsFeedState extends State<NewsFeed> {
       final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
       await checkViewed();
+      _saved = await readFileSave();
       return RssFeed.parse(response.body);
     } catch (e) {
       throw new FormatException('thrown-error');
@@ -159,6 +214,10 @@ class _NewsFeedState extends State<NewsFeed> {
   }
 
   listNews() {
+    print("asdguvasjbhdkngv");
+    print(convertRssFeedToString(_feed));
+    print("====================");
+
     return ListView.builder(
       itemCount: _feed.items?.length,
       itemBuilder: (BuildContext context, int index) {
