@@ -128,14 +128,14 @@ class _NewsFeedState extends State<NewsFeed> {
       String title = _feed.items![i].title ?? 'title';
       String url = _feed.items![i].link ?? 'url';
       DateTime date = _feed.items![i].pubDate!;
-      String pubdate = DateFormat.yMd().add_jm().format(date);
+      String pubdate = dateFormat.format(date);
       sb = sb +
           widget.rss.newsTitle +
-          ',' +
+          ';,' +
           title +
-          ',' +
+          ';,' +
           url +
-          ',' +
+          ';,' +
           pubdate +
           "\n";
     }
@@ -156,14 +156,56 @@ class _NewsFeedState extends State<NewsFeed> {
     });
   }
 
+  addSavedFeed() {
+    const splitter = LineSplitter();
+    final savedList = splitter.convert(_saved);
+    print(savedList);
+    for (int i = 0; i < savedList.length; i++) {
+      final rssData = savedList[i].split(';,');
+      print("Data " + i.toString() + ': ' + rssData[1]);
+      if (rssData[0] == widget.rss.newsTitle) {
+        print("Data " + i.toString() + ': ' + rssData[2]);
+        RssItem temp = new RssItem(
+            author: '',
+            title: rssData[1],
+            link: rssData[2],
+            pubDate: DateTime.parse(rssData[3]));
+        _feed.items!.add(temp);
+      }
+    }
+  }
+
   Future loadFeed() async {
+    print("Load Feed initiated");
     try {
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
       await checkViewed();
       _saved = await readFileSave();
-      return RssFeed.parse(response.body);
+      print("====================SAVED BEFORE ====================");
+      print(_saved);
+
+      print("==============Start OF FEED=============");
+      for (int i = 0; i < _feed.items!.length; i++) {
+        String stringChecker = _feed.items![i].title as String;
+
+        if (_saved.contains(stringChecker)) {
+          print("LINKKKKKK ==== " + stringChecker);
+          _feed.items!.removeAt(i);
+          i--;
+        }
+      }
+      _saved = convertRssFeedToString(_feed) + _saved;
+      print(convertRssFeedToString(_feed));
+      print("==============END OF FEED=============");
+      //_saved = convertRssFeedToString(_feed) + _saved;
+      //_saved = '';
+      print(_saved);
+      await writeFileSave(_saved);
+
+      addSavedFeed();
+      return 1;
     } catch (e) {
       throw new FormatException('thrown-error');
     }
@@ -214,10 +256,6 @@ class _NewsFeedState extends State<NewsFeed> {
   }
 
   listNews() {
-    print("asdguvasjbhdkngv");
-    print(convertRssFeedToString(_feed));
-    print("====================");
-
     return ListView.builder(
       itemCount: _feed.items?.length,
       itemBuilder: (BuildContext context, int index) {
