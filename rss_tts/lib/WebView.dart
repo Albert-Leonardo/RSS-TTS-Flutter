@@ -22,7 +22,7 @@ class WebView extends StatefulWidget {
       required this.index,
       required this.isNewest,
       required this.update});
-  final ValueChanged<int> update;
+  final ValueChanged<String> update;
   final newsRSS rss;
   int index;
   RssFeed feed;
@@ -144,11 +144,12 @@ class _WebViewState extends State<WebView> {
       saveNext();
       writeFile(writeViewed());
     });
-    widget.update(100);
+
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
     widget.index++;
     setState(() {
+      widget.update(widget.feed.items![widget.index].title as String);
       stopSpeak();
       checkPlay = true;
       widget._controller!.loadUrl(
@@ -157,7 +158,6 @@ class _WebViewState extends State<WebView> {
                   Uri.parse(widget.feed.items![widget.index].link.toString())));
     });
 
-    if (widget.rss.login) stopSpeak();
     stopSpeak();
     TTS = [];
     ttsIndex = 0;
@@ -203,11 +203,12 @@ class _WebViewState extends State<WebView> {
       saveNext();
       writeFile(writeViewed());
     });
-    widget.update(100);
+
     checkPlay = true;
     print("PUSHHHHHHHHHHHHHHHH!");
     widget.index--;
     setState(() {
+      widget.update(widget.feed.items![widget.index].title as String);
       widget._controller!.loadUrl(
           urlRequest: URLRequest(
               url:
@@ -404,10 +405,11 @@ class _WebViewState extends State<WebView> {
                   },
                   onLoadStop: (controller, url) async {
                     setState(() {
+                      widget.update(
+                          widget.feed.items![widget.index].title as String);
                       saveNext();
                       writeFile(writeViewed());
                     });
-                    widget.update(100);
                     checkPlay = true;
                     startRSS = true;
                     canGoNext = true;

@@ -14,8 +14,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 class NewsFeed extends StatefulWidget {
-  const NewsFeed({super.key, required this.rss});
+  NewsFeed({super.key, required this.rss});
   final newsRSS rss;
+  String reading = '';
   @override
   State<NewsFeed> createState() => _NewsFeedState();
 }
@@ -109,6 +110,12 @@ class _NewsFeedState extends State<NewsFeed> {
   checkColor(RssItem item) {
     DateTime d1 = item.pubDate as DateTime;
     DateTime d2 = DateTime.now().subtract(const Duration(days: 1));
+    print("greenagsyuvdhjbnkasd");
+    print(widget.reading);
+    print("=======================");
+    if (widget.reading == item.title) {
+      return Color.fromARGB(255, 33, 227, 81);
+    }
     if (viewed.contains(item.link)) {
       return Color.fromARGB(255, 188, 132, 237);
     } else if (d1.isBefore(d2)) {
@@ -157,6 +164,7 @@ class _NewsFeedState extends State<NewsFeed> {
   }
 
   addSavedFeed() {
+    _feed.items!.clear();
     const splitter = LineSplitter();
     final savedList = splitter.convert(_saved);
     print(savedList);
@@ -231,8 +239,12 @@ class _NewsFeedState extends State<NewsFeed> {
     // defines a timer
   }
 
-  void _update(int count) {
+  void _update(String reading) {
     setState(() {
+      widget.reading = reading;
+      print("=======green??");
+      print(reading);
+      print(widget.reading);
       _now = DateTime.now().second.toString();
     });
   }
