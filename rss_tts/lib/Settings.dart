@@ -29,8 +29,20 @@ class _SettingsPageState extends State<SettingsPage> {
     return File('$path/viewed.txt');
   }
 
+  Future<File> get _localFileSave async {
+    final path = await _localPath;
+    return File('$path/saved.txt');
+  }
+
   Future<File> writeFile(String s) async {
     final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
+  Future<File> writeFileSave(String s) async {
+    final file = await _localFileSave;
 
     // Write the file
     return file.writeAsString(s);
@@ -45,6 +57,23 @@ class _SettingsPageState extends State<SettingsPage> {
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Success!'),
           content: const Text('Successfully cleared view history'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    alertWriteSaved() {
+      writeFileSave("");
+      return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Success!'),
+          content: const Text('Successfully cleared Saved history'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context, 'OK'),
@@ -122,6 +151,13 @@ class _SettingsPageState extends State<SettingsPage> {
         subtitle: '',
         leading: Icon(Icons.delete),
         onTap: () => alertWrite());
+
+    Widget clearSavedCacheSettings() => SimpleSettingsTile(
+        title: 'Clear Saved Cache',
+        subtitle: '',
+        leading: Icon(Icons.delete_forever),
+        onTap: () => alertWriteSaved());
+
     return Scaffold(
       drawer: NavBar(),
       appBar: AppBar(
@@ -144,6 +180,7 @@ class _SettingsPageState extends State<SettingsPage> {
             modifyRssSettings(),
             modifyTime(context),
             clearViewedCacheSettings(),
+            clearSavedCacheSettings(),
           ])
         ],
       )),

@@ -65,6 +65,17 @@ class NavBar extends StatelessWidget {
               }
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.help),
+            title: const Text('Help'),
+            onTap: () {
+              var route = ModalRoute.of(context);
+              if (route != null) {
+                String? origin = route.settings.name;
+                navigateRoute(origin, '/help', context);
+              }
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.exit_to_app),

@@ -17,6 +17,7 @@ class NewsFeed extends StatefulWidget {
   NewsFeed({super.key, required this.rss});
   final newsRSS rss;
   String reading = '';
+  int readingIndex = 0;
   @override
   State<NewsFeed> createState() => _NewsFeedState();
 }
@@ -58,7 +59,6 @@ class _NewsFeedState extends State<NewsFeed> {
     File file = await _localFile;
     if (await file.exists()) {
       try {
-        print("exists");
         String contents = await file.readAsString();
         return contents;
       } catch (e) {
@@ -66,7 +66,6 @@ class _NewsFeedState extends State<NewsFeed> {
         return '0';
       }
     } else {
-      print("no exists");
       String s = "";
       await writeFile(s);
       return s;
@@ -77,7 +76,6 @@ class _NewsFeedState extends State<NewsFeed> {
     File file = await _localFileSave;
     if (await file.exists()) {
       try {
-        print("exists");
         String contents = await file.readAsString();
         return contents;
       } catch (e) {
@@ -85,7 +83,6 @@ class _NewsFeedState extends State<NewsFeed> {
         return '0';
       }
     } else {
-      print("no exists");
       String s = "";
       await writeFile(s);
       return s;
@@ -110,9 +107,7 @@ class _NewsFeedState extends State<NewsFeed> {
   checkColor(RssItem item) {
     DateTime d1 = item.pubDate as DateTime;
     DateTime d2 = DateTime.now().subtract(const Duration(days: 1));
-    print("greenagsyuvdhjbnkasd");
-    print(widget.reading);
-    print("=======================");
+
     if (widget.reading == item.title) {
       return Color.fromARGB(255, 33, 227, 81);
     }
@@ -146,7 +141,6 @@ class _NewsFeedState extends State<NewsFeed> {
           pubdate +
           "\n";
     }
-    print(sb);
     return sb;
   }
 
@@ -167,12 +161,10 @@ class _NewsFeedState extends State<NewsFeed> {
     _feed.items!.clear();
     const splitter = LineSplitter();
     final savedList = splitter.convert(_saved);
-    print(savedList);
     for (int i = 0; i < savedList.length; i++) {
       final rssData = savedList[i].split(';,');
-      print("Data " + i.toString() + ': ' + rssData[1]);
+
       if (rssData[0] == widget.rss.newsTitle) {
-        print("Data " + i.toString() + ': ' + rssData[2]);
         RssItem temp = new RssItem(
             author: '',
             title: rssData[1],
@@ -184,32 +176,24 @@ class _NewsFeedState extends State<NewsFeed> {
   }
 
   Future loadFeed() async {
-    print("Load Feed initiated");
     try {
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
       await checkViewed();
       _saved = await readFileSave();
-      print("====================SAVED BEFORE ====================");
-      print(_saved);
 
-      print("==============Start OF FEED=============");
       for (int i = 0; i < _feed.items!.length; i++) {
         String stringChecker = _feed.items![i].title as String;
 
         if (_saved.contains(stringChecker)) {
-          print("LINKKKKKK ==== " + stringChecker);
           _feed.items!.removeAt(i);
           i--;
         }
       }
       _saved = convertRssFeedToString(_feed) + _saved;
-      print(convertRssFeedToString(_feed));
-      print("==============END OF FEED=============");
       //_saved = convertRssFeedToString(_feed) + _saved;
       //_saved = '';
-      print(_saved);
       await writeFileSave(_saved);
 
       addSavedFeed();
@@ -249,6 +233,15 @@ class _NewsFeedState extends State<NewsFeed> {
     });
   }
 
+  void _updateIndex(int index) {
+    setState(() {
+      widget.readingIndex = index;
+      print("Index = :::::");
+      print(index);
+      _now = DateTime.now().second.toString();
+    });
+  }
+
   newsTitle(title) {
     return Text(
       title,
@@ -284,15 +277,37 @@ class _NewsFeedState extends State<NewsFeed> {
           ),
           contentPadding: EdgeInsets.all(5.0),
           onTap: () async {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => WebView(
-                      rss: widget.rss,
-                      feed: _feed,
-                      index: isNewest ? index : _feed.items!.length - index - 1,
-                      isNewest: isNewest,
-                      update: _update,
-                    )));
-
+            if (widget.reading == item.title) {
+              print("Continued112");
+              print(widget.readingIndex);
+              int readindex = widget.readingIndex;
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => WebView(
+                        rss: widget.rss,
+                        feed: _feed,
+                        index:
+                            isNewest ? index : _feed.items!.length - index - 1,
+                        isNewest: isNewest,
+                        update: _update,
+                        updateIndex: _updateIndex,
+                        readingIndex: readindex,
+                        continueBool: true,
+                      )));
+            } else {
+              _update(item.title as String);
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => WebView(
+                        rss: widget.rss,
+                        feed: _feed,
+                        index:
+                            isNewest ? index : _feed.items!.length - index - 1,
+                        isNewest: isNewest,
+                        update: _update,
+                        updateIndex: _updateIndex,
+                        readingIndex: 0,
+                        continueBool: false,
+                      )));
+            }
             setState(() {
               viewed.add(item.link as String);
               writeFile(writeViewed());

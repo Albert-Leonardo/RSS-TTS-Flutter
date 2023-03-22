@@ -21,10 +21,16 @@ class WebView extends StatefulWidget {
       required this.feed,
       required this.index,
       required this.isNewest,
-      required this.update});
+      required this.update,
+      required this.updateIndex,
+      required this.readingIndex,
+      required this.continueBool});
   final ValueChanged<String> update;
+  final ValueChanged<int> updateIndex;
   final newsRSS rss;
+  int readingIndex;
   int index;
+  bool continueBool;
   RssFeed feed;
   final bool isNewest;
   InAppWebViewController? _controller;
@@ -108,7 +114,11 @@ class _WebViewState extends State<WebView> {
     super.initState();
     stopSpeak();
     TTS = [];
-    ttsIndex = 0;
+    if (widget.continueBool) {
+      ttsIndex = widget.readingIndex;
+      widget.continueBool = false;
+    } else
+      ttsIndex = 0;
     checkPlay = true;
     playerVisibility = true;
     readed = 0;
@@ -128,6 +138,13 @@ class _WebViewState extends State<WebView> {
     await flutterTts.setLanguage('en-UN');
     await flutterTts.setPitch(1);
     await flutterTts.speak(text);
+  }
+
+  testTTS() async {
+    await flutterTts.awaitSpeakCompletion(true);
+    await flutterTts.setLanguage('en-UN');
+    await flutterTts.setPitch(1);
+    await flutterTts.speak("Hello this is a TTS test");
   }
 
   stopSpeak() async {
@@ -257,6 +274,7 @@ class _WebViewState extends State<WebView> {
       if (checkPlay == true) {
         await speak(TTS[ttsIndex]);
         ttsIndex++;
+        widget.updateIndex(ttsIndex);
         print("Index: " + ttsIndex.toString());
         print("TTSLENGTH: " + TTS.length.toString());
         if (ttsIndex == TTS.length) {
@@ -338,6 +356,7 @@ class _WebViewState extends State<WebView> {
       for (String p in news) {
         p = p.replaceAll(RegExp(r"<\\?.*?>"), "");
         p = p.replaceAll("&nbsp", " ");
+        p = p.replaceAll(";", " ");
         print(p);
         final pp = p.split('. ');
         TTS = TTS + pp;
@@ -385,6 +404,13 @@ class _WebViewState extends State<WebView> {
                     if (!widget.rss.login) {
                       if (TTS[0].isNotEmpty && startRSS) {
                         checkPlay = true;
+                        if (widget.continueBool) {
+                          print("Continued!");
+
+                          widget.readingIndex = ttsIndex;
+                          print(widget.readingIndex);
+                          widget.continueBool = false;
+                        }
                         player();
                         startRSS = false;
                       }
@@ -440,6 +466,10 @@ class _WebViewState extends State<WebView> {
                         print(TTS);
 
                         if (loadOnce) {
+                          if (widget.continueBool) {
+                            widget.readingIndex = ttsIndex;
+                            widget.continueBool = false;
+                          }
                           await player();
                         }
                         if (!loadOnce) loadOnce = !loadOnce;
@@ -515,6 +545,7 @@ class _WebViewState extends State<WebView> {
                               checkPlay = false;
                               await player();
                               ttsIndex++;
+                              widget.updateIndex(ttsIndex);
                               checkPlay = true;
                               await player();
                             },
@@ -541,6 +572,7 @@ class _WebViewState extends State<WebView> {
                               color: Colors.blue,
                               onPressed: () {
                                 setState(() {
+                                  //testTTS();
                                   playerVisibility = !playerVisibility;
                                 });
                               }),
