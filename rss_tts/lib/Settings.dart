@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rss_tts/ModifyRSS.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
+import 'package:rss_tts/delete.dart';
 
 class SettingsPage extends StatefulWidget {
   static const keyDarkMode = 'key-dark-mode';
@@ -147,16 +148,12 @@ class _SettingsPageState extends State<SettingsPage> {
           await editOldTime(context);
         });
     Widget clearViewedCacheSettings() => SimpleSettingsTile(
-        title: 'Clear Viewed Cache',
-        subtitle: '',
-        leading: Icon(Icons.delete),
-        onTap: () => alertWrite());
-
-    Widget clearSavedCacheSettings() => SimpleSettingsTile(
-        title: 'Clear Saved Cache',
-        subtitle: '',
-        leading: Icon(Icons.delete_forever),
-        onTap: () => alertWriteSaved());
+          title: 'Delete Cache',
+          subtitle: '',
+          leading: Icon(Icons.delete),
+          onTap: () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => delete())),
+        );
 
     return Scaffold(
       drawer: NavBar(),
@@ -180,7 +177,6 @@ class _SettingsPageState extends State<SettingsPage> {
             modifyRssSettings(),
             modifyTime(context),
             clearViewedCacheSettings(),
-            clearSavedCacheSettings(),
           ])
         ],
       )),

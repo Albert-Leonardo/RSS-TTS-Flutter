@@ -9,6 +9,8 @@ import 'package:rss_tts/ModifyRSS.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 
+import 'Settings.dart';
+
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
   Widget build(BuildContext context) {
@@ -155,43 +157,123 @@ class AddRSS extends StatelessWidget {
 }
 
 class FAQs extends StatelessWidget {
-  const FAQs({super.key});
+  final isDarkMode = Settings.getValue<bool>(SettingsPage.keyDarkMode, true);
+  FAQs({super.key});
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Help"),
-      ),
-      body: Container(
-        margin: EdgeInsets.all(24),
-        child: Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "What do the checkboxes do in the 'Modify RSS' Option?",
-                  style: TextStyle(fontSize: 25),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  "- To enable/disable the rss in the main page",
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 25),
-                const Text(
-                  "How to save RSS Feeds",
-                  style: TextStyle(fontSize: 25),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  "- Just load the rss page and it will save articles at the time",
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 10),
-              ],
-            )),
-      ),
-    );
+        appBar: AppBar(
+          title: Text("Frequently Asked Questions"),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            margin: EdgeInsets.all(24),
+            child: Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Text Color Explainations: ",
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Text(
+                          isDarkMode ? 'White : ' : 'Black : ',
+                          style: TextStyle(fontSize: 25),
+                        ),
+                        Expanded(
+                            child: Text(
+                          "Article has not been read and is not one day old",
+                          style: TextStyle(fontSize: 25),
+                        ))
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Text(
+                          'Purple: ',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Color.fromARGB(255, 188, 132, 237)),
+                        ),
+                        Expanded(
+                            child: Text(
+                          "Article has been read",
+                          style: TextStyle(fontSize: 25),
+                        ))
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Text(
+                          'Yellow: ',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Color.fromARGB(255, 207, 221, 51)),
+                        ),
+                        Expanded(
+                            child: Text(
+                          "Article has not been read and is more than one day old",
+                          style: TextStyle(fontSize: 25),
+                        ))
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Text(
+                          'Green: ',
+                          style: TextStyle(
+                            fontSize: 25,
+                            color: Color.fromARGB(255, 33, 227, 81),
+                          ),
+                        ),
+                        Expanded(
+                            child: Text(
+                          "Article is being read",
+                          style: TextStyle(fontSize: 25),
+                        ))
+                      ],
+                    ),
+                    const Divider(
+                      height: 25,
+                      thickness: 2,
+                      indent: 0,
+                      endIndent: 5,
+                    ),
+                    const Text(
+                      "What do the checkboxes do in the 'Modify RSS' Option?",
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "- To enable/disable the rss in the main page",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    const Divider(
+                      height: 25,
+                      thickness: 2,
+                      indent: 0,
+                      endIndent: 5,
+                    ),
+                    const Text(
+                      "How to save RSS Feeds",
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "- Just load the rss page and it will automatically save articles at the time",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                )),
+          ),
+        ));
   }
 }
 /*

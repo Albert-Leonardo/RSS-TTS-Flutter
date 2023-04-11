@@ -166,56 +166,56 @@ class _WebViewState extends State<WebView> {
       saveNext();
       writeFile(writeViewed());
     });
+    if (widget.isNewest) {
+      print("PUSHHHHHHHHHHHHHHHH!");
+      widget.index++;
+      if (widget._visible1) {
+        setState(() {
+          widget._visible1 = !widget._visible1;
+          widget._visible2 = !widget._visible2;
+          TTS[0] = [];
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller1!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index + 1].link.toString())));
+        });
+      } else {
+        setState(() {
+          TTS[1] = [];
+          widget._visible1 = !widget._visible1;
+          widget._visible2 = !widget._visible2;
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller2!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index + 1].link.toString())));
+        });
+      }
 
-    print("PUSHHHHHHHHHHHHHHHH!");
-    widget.index++;
-    if (widget._visible1) {
-      setState(() {
-        widget._visible1 = !widget._visible1;
-        widget._visible2 = !widget._visible2;
-        TTS[0] = [];
-        widget.update(widget.feed.items![widget.index].title as String);
-        stopSpeak();
-        checkPlay = true;
-        widget._controller1!.loadUrl(
-            urlRequest: URLRequest(
-                url: Uri.parse(
-                    widget.feed.items![widget.index + 1].link.toString())));
-      });
-    } else {
-      setState(() {
-        TTS[1] = [];
-        widget._visible1 = !widget._visible1;
-        widget._visible2 = !widget._visible2;
-        widget.update(widget.feed.items![widget.index].title as String);
-        stopSpeak();
-        checkPlay = true;
-        widget._controller2!.loadUrl(
-            urlRequest: URLRequest(
-                url: Uri.parse(
-                    widget.feed.items![widget.index + 1].link.toString())));
-      });
-    }
+      stopSpeak();
 
-    stopSpeak();
+      ttsIndex = 0;
+      checkPlay = true;
+      playerVisibility = true;
+      readed = 0;
+      startRSS = true;
+      canGoNext = false;
+      loadOnce = false;
+      loadFinish = false;
+      mainPage = 0;
 
-    ttsIndex = 0;
-    checkPlay = true;
-    playerVisibility = true;
-    readed = 0;
-    startRSS = true;
-    canGoNext = false;
-    loadOnce = false;
-    loadFinish = false;
-    mainPage = 0;
+      checkViewed();
 
-    checkViewed();
-
-    if (!widget.rss.login && widget._visible1) getWebsiteData2(1);
-    if (!widget.rss.login && widget._visible2) getWebsiteData1(1);
-    print("CHANGED!!!");
-    if (widget.rss.login) stopSpeak();
-    /*Navigator.of(context).pushReplacement(MaterialPageRoute(
+      if (!widget.rss.login && widget._visible1) getWebsiteData2(1);
+      if (!widget.rss.login && widget._visible2) getWebsiteData1(1);
+      print("CHANGED!!!");
+      if (widget.rss.login) stopSpeak();
+      /*Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => WebView(
               rss: widget.rss,
               feed: widget.feed,
@@ -223,84 +223,173 @@ class _WebViewState extends State<WebView> {
               isNewest: widget.isNewest,
             )));*/
 
-    if (!widget.rss.login) {
+      if (!widget.rss.login) {
+        checkPlay = true;
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        print("Nologin");
+      }
+      if (widget.rss.login) {
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        checkPlay = true;
+      }
+      print(TTS[0]);
+      print(TTS[1]);
+      print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
+    } else {
+      print("PUSHHHHHHHHHHHHHHHH!");
+      widget.index++;
+      if (widget._visible1) {
+        setState(() {
+          TTS[0] = [];
+          TTS[1] = [];
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller1!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index].link.toString())));
+          widget._controller2!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index + 1].link.toString())));
+        });
+      } else {
+        setState(() {
+          TTS[1] = [];
+          TTS[0] = [];
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller2!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index].link.toString())));
+          widget._controller1!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index + 1].link.toString())));
+        });
+      }
+      stopSpeak();
+
+      ttsIndex = 0;
       checkPlay = true;
-      if (widget._visible1)
-        await player1();
-      else
-        await player2();
-      print("Nologin");
+      playerVisibility = true;
+      readed = 0;
+      startRSS = true;
+      canGoNext = false;
+      loadOnce = false;
+      loadFinish = false;
+      mainPage = 0;
+
+      checkViewed();
+      if (!widget.rss.login && widget._visible1) {
+        getWebsiteData2(1);
+        getWebsiteData1(0);
+      }
+      if (!widget.rss.login && widget._visible2) {
+        getWebsiteData1(1);
+        getWebsiteData2(0);
+      }
+      if (widget.rss.login) stopSpeak();
+      /*Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => WebView(
+              rss: widget.rss,
+              feed: widget.feed,
+              index: widget.index + 1,
+              isNewest: widget.isNewest,
+            )));*/
+
+      if (!widget.rss.login) {
+        checkPlay = true;
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        print("Nologin");
+      }
+      if (widget.rss.login) {
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        checkPlay = true;
+      }
+      print(TTS[0]);
+      print(TTS[1]);
+      print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
     }
-    if (widget.rss.login) stopSpeak();
-    print(TTS[0]);
-    print(TTS[1]);
-    print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
   }
 
   previousPage() async {
+    if (widget.index == 0) {
+      return null;
+    }
     checkPlay = false;
 
     await player1();
     await player2();
     setState(() {
-      stopSpeak();
-      checkPlay = true;
       saveNext();
       writeFile(writeViewed());
     });
-
-    checkPlay = true;
-    print("PUSHHHHHHHHHHHHHHHH!");
-    widget.index--;
-
-    setState(() {
-      widget.update(widget.feed.items![widget.index].title as String);
+    if (!widget.isNewest) {
+      print("PUSHHHHHHHHHHHHHHHH!");
+      widget.index--;
       if (widget._visible1) {
-        widget._visible1 = !widget._visible1;
-        widget._visible2 = !widget._visible2;
-        widget._controller1!.loadUrl(
-            urlRequest: URLRequest(
-                url: Uri.parse(
-                    widget.feed.items![widget.index].link.toString())));
-        widget._controller2!.loadUrl(
-            urlRequest: URLRequest(
-                url: Uri.parse(
-                    widget.feed.items![widget.index + 1].link.toString())));
+        setState(() {
+          widget._visible1 = !widget._visible1;
+          widget._visible2 = !widget._visible2;
+          TTS[0] = [];
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller1!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index - 1].link.toString())));
+        });
       } else {
-        widget._visible1 = !widget._visible1;
-        widget._visible2 = !widget._visible2;
-        widget._controller2!.loadUrl(
-            urlRequest: URLRequest(
-                url: Uri.parse(
-                    widget.feed.items![widget.index].link.toString())));
-        widget._controller1!.loadUrl(
-            urlRequest: URLRequest(
-                url: Uri.parse(
-                    widget.feed.items![widget.index + 1].link.toString())));
+        setState(() {
+          TTS[1] = [];
+          widget._visible1 = !widget._visible1;
+          widget._visible2 = !widget._visible2;
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller2!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index - 1].link.toString())));
+        });
       }
-    });
 
-    if (widget.rss.login) stopSpeak();
-    stopSpeak();
-    TTS = [[], []];
-    ttsIndex = 0;
-    checkPlay = true;
-    playerVisibility = true;
-    readed = 0;
-    startRSS = true;
-    canGoNext = false;
-    loadOnce = false;
-    loadFinish = false;
-    mainPage = 0;
+      stopSpeak();
 
-    checkViewed();
+      ttsIndex = 0;
+      checkPlay = true;
+      playerVisibility = true;
+      readed = 0;
+      startRSS = true;
+      canGoNext = false;
+      loadOnce = false;
+      loadFinish = false;
+      mainPage = 0;
 
-    if (!widget.rss.login && widget._visible1) getWebsiteData2(1);
-    if (!widget.rss.login && widget._visible2) getWebsiteData1(1);
+      checkViewed();
 
-    print("CHANGED!!!");
-    if (widget.rss.login) stopSpeak();
-    /*Navigator.of(context).pushReplacement(MaterialPageRoute(
+      if (!widget.rss.login && widget._visible1) getWebsiteData2(-1);
+      if (!widget.rss.login && widget._visible2) getWebsiteData1(-1);
+      print("CHANGED!!!");
+      if (widget.rss.login) stopSpeak();
+      /*Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => WebView(
               rss: widget.rss,
               feed: widget.feed,
@@ -308,17 +397,109 @@ class _WebViewState extends State<WebView> {
               isNewest: widget.isNewest,
             )));*/
 
-    if (!widget.rss.login) {
+      if (!widget.rss.login) {
+        checkPlay = true;
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        print("Nologin");
+      }
+      if (widget.rss.login) {
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        checkPlay = true;
+      }
+      print(TTS[0]);
+      print(TTS[1]);
+      print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
+    } else {
+      print("PUSHHHHHHHHHHHHHHHH!");
+      widget.index--;
+      if (widget._visible1) {
+        setState(() {
+          TTS[0] = [];
+          TTS[1] = [];
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller1!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index].link.toString())));
+          widget._controller2!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index + 1].link.toString())));
+        });
+      } else {
+        setState(() {
+          TTS[1] = [];
+          TTS[0] = [];
+          widget.update(widget.feed.items![widget.index].title as String);
+          stopSpeak();
+          checkPlay = true;
+          widget._controller2!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index].link.toString())));
+          widget._controller1!.loadUrl(
+              urlRequest: URLRequest(
+                  url: Uri.parse(
+                      widget.feed.items![widget.index + 1].link.toString())));
+        });
+      }
+      stopSpeak();
+
+      ttsIndex = 0;
       checkPlay = true;
-      if (widget._visible1)
-        await player1();
-      else
-        await player2();
-      print("Nologin");
+      playerVisibility = true;
+      readed = 0;
+      startRSS = true;
+      canGoNext = false;
+      loadOnce = false;
+      loadFinish = false;
+      mainPage = 0;
+
+      checkViewed();
+      if (!widget.rss.login && widget._visible1) {
+        getWebsiteData2(1);
+        getWebsiteData1(0);
+      }
+      if (!widget.rss.login && widget._visible2) {
+        getWebsiteData1(1);
+        getWebsiteData2(0);
+      }
+      if (widget.rss.login) stopSpeak();
+      /*Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => WebView(
+              rss: widget.rss,
+              feed: widget.feed,
+              index: widget.index + 1,
+              isNewest: widget.isNewest,
+            )));*/
+
+      if (!widget.rss.login) {
+        checkPlay = true;
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        print("Nologin");
+      }
+      if (widget.rss.login) {
+        if (widget._visible1)
+          await player1();
+        else
+          await player2();
+        checkPlay = true;
+      }
+      print(TTS[0]);
+      print(TTS[1]);
+      print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
     }
-    if (widget.rss.login) stopSpeak();
-    print("Nologin2");
-    print(": TTSINDEXXXXXXXXXXXXXXXXX: " + ttsIndex.toString());
   }
 
   player1() async {
@@ -459,7 +640,7 @@ class _WebViewState extends State<WebView> {
           .map((e) => e.innerHtml.trim())
           .toList();
       print('Count: ${news.length}');
-      TTS[1].add(widget.feed.items![widget.index + 1].title as String);
+      TTS[1].add(widget.feed.items![widget.index + index].title as String);
       for (String p in news) {
         p = p.replaceAll(RegExp(r"<\\?.*?>"), "");
         p = p.replaceAll("&nbsp", " ");
@@ -474,8 +655,32 @@ class _WebViewState extends State<WebView> {
     }
   }
 
+  int getIncrement() {
+    if (widget.isNewest)
+      return 1;
+    else
+      return -1;
+  }
+
   _popUp() {
     print("Popup");
+  }
+
+  getJavascript(controller) async {
+    var response = await controller.evaluateJavascript(
+        source: "document.documentElement.innerText;");
+    LineSplitter ls = new LineSplitter();
+    List<String> responseSplit = ls.convert(response);
+    print(responseSplit);
+    responseSplit.removeRange(responseSplit.length - 5, responseSplit.length);
+    List<String> newResponse = [];
+    for (String p in responseSplit) {
+      p = p.replaceAll(r'ADS', '');
+      if (p.startsWith("#")) continue;
+      print(p);
+      newResponse.add(p);
+    }
+    return newResponse;
   }
 
   double _progress = 0;
@@ -525,8 +730,10 @@ class _WebViewState extends State<WebView> {
                         }
                       }
                       if (widget.rss.login) {
-                        checkPlay = false;
-                        if (widget._visible1) player1();
+                        if (widget._visible1) {
+                          checkPlay = false;
+                          player1();
+                        }
                       }
 
                       setState(() {
@@ -535,9 +742,6 @@ class _WebViewState extends State<WebView> {
                     },
                     onUpdateVisitedHistory: (_, Uri? uri, __) {
                       mainPage++;
-
-                      print(
-                          "VISITEDDDDDDDDDDDDDDDDDDDD: " + mainPage.toString());
                     },
                     onLoadStop: (controller, url) async {
                       setState(() {
@@ -549,41 +753,34 @@ class _WebViewState extends State<WebView> {
                         print(TTS[0]);
                         print(TTS[1]);
                       });
-                      checkPlay = true;
-                      startRSS = true;
-                      canGoNext = true;
-                      if (mainPage <= 2) {
+                      if (!widget.rss.login) {
+                        checkPlay = true;
+                        startRSS = true;
+                        canGoNext = true;
+                      }
+                      if (mainPage <= 4) {
                         if (widget.rss.login) {
                           print(
                               "=================================================");
-                          var response = await controller.evaluateJavascript(
-                              source: "document.documentElement.innerText;");
-                          LineSplitter ls = new LineSplitter();
-                          List<String> responseSplit = ls.convert(response);
-                          print(responseSplit);
-                          responseSplit.removeRange(
-                              responseSplit.length - 5, responseSplit.length);
-                          List<String> newResponse = [];
-                          for (String p in responseSplit) {
-                            p = p.replaceAll(r'ADS', '');
-                            if (p.startsWith("#")) continue;
-                            print(p);
-                            newResponse.add(p);
-                          }
-                          TTS[0] = newResponse;
+
+                          TTS[0] = await getJavascript(controller);
                           loadFinish = true;
-                          print(
-                              "=================================================");
+                          print("TTSlengthandtext");
                           print("TTS LENGTH:" + TTS.length.toString());
 
                           print(TTS);
 
                           if (loadOnce) {
+                            print("LoadOnce");
                             if (widget.continueBool) {
+                              print("LoadOnce");
                               widget.readingIndex = ttsIndex;
                               widget.continueBool = false;
                             }
-                            if (widget._visible1) player1();
+                            if (widget._visible1) {
+                              checkPlay = true;
+                              player1();
+                            }
                           }
                           if (!loadOnce) loadOnce = !loadOnce;
                         }
@@ -606,13 +803,13 @@ class _WebViewState extends State<WebView> {
                             transparentBackground: true,
                             javaScriptEnabled: true)),
                     initialUrlRequest: URLRequest(
-                        url: Uri.parse(stringConverter(
-                            widget.feed.items![widget.index + 1].link))),
+                        url: Uri.parse(stringConverter(widget
+                            .feed.items![widget.index + getIncrement()].link))),
                     onWebViewCreated:
                         (InAppWebViewController controller) async {
                       widget._controller2 = controller;
                       print("Lollllllllllll");
-                      await getWebsiteData2(1);
+                      await getWebsiteData2(getIncrement());
                     },
                     onProgressChanged: (InAppWebViewController controller,
                         int progress) async {
@@ -632,8 +829,10 @@ class _WebViewState extends State<WebView> {
                         }
                       }
                       if (widget.rss.login) {
-                        checkPlay = false;
-                        if (widget._visible2) player2();
+                        if (widget._visible2) {
+                          checkPlay = false;
+                          player2();
+                        }
                       }
 
                       setState(() {
@@ -653,28 +852,17 @@ class _WebViewState extends State<WebView> {
                         saveNext();
                         writeFile(writeViewed());
                       });
-                      checkPlay = true;
-                      startRSS = true;
-                      canGoNext = true;
-                      if (mainPage <= 2) {
+                      if (!widget.rss.login) {
+                        checkPlay = true;
+                        startRSS = true;
+                        canGoNext = true;
+                      }
+                      if (mainPage <= 4) {
                         if (widget.rss.login) {
                           print(
                               "=================================================");
-                          var response = await controller.evaluateJavascript(
-                              source: "document.documentElement.innerText;");
-                          LineSplitter ls = new LineSplitter();
-                          List<String> responseSplit = ls.convert(response);
-                          print(responseSplit);
-                          responseSplit.removeRange(
-                              responseSplit.length - 5, responseSplit.length);
-                          List<String> newResponse = [];
-                          for (String p in responseSplit) {
-                            p = p.replaceAll(r'ADS', '');
-                            if (p.startsWith("#")) continue;
-                            print(p);
-                            newResponse.add(p);
-                          }
-                          TTS[1] = newResponse;
+
+                          TTS[1] = await getJavascript(controller);
                           loadFinish = true;
                           print(
                               "=================================================");
