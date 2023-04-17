@@ -70,7 +70,6 @@ class _WebViewState extends State<WebView> {
     File file = await _localFile;
     if (await file.exists()) {
       try {
-        print("exists");
         String contents = await file.readAsString();
         return contents;
       } catch (e) {
@@ -78,7 +77,6 @@ class _WebViewState extends State<WebView> {
         return '0';
       }
     } else {
-      print("no exists");
       String s = "";
       await writeFile(s);
       return s;
