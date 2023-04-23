@@ -23,7 +23,7 @@ class NewsFeed extends StatefulWidget {
 }
 
 class _NewsFeedState extends State<NewsFeed> {
-  bool isNewest = true;
+  late bool isNewest;
   late List<String> viewed;
   List<RssItem> feed = [];
   List<String> newsPage = [];
@@ -38,6 +38,11 @@ class _NewsFeedState extends State<NewsFeed> {
     return File('$path/viewed.txt');
   }
 
+  Future<File> get _localFileSettings async {
+    final path = await _localPath;
+    return File('$path/settings.txt');
+  }
+
   Future<File> get _localFileSave async {
     final path = await _localPath;
     return File('$path/saved.txt');
@@ -45,6 +50,13 @@ class _NewsFeedState extends State<NewsFeed> {
 
   Future<File> writeFile(String s) async {
     final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
+  Future<File> writeFileSettings(String s) async {
+    final file = await _localFileSettings;
 
     // Write the file
     return file.writeAsString(s);
@@ -86,6 +98,23 @@ class _NewsFeedState extends State<NewsFeed> {
       }
     } else {
       String s = "";
+      await writeFile(s);
+      return s;
+    }
+  }
+
+  Future<String> readFileSettings() async {
+    File file = await _localFileSettings;
+    if (await file.exists()) {
+      try {
+        String contents = await file.readAsString();
+        return contents;
+      } catch (e) {
+        // If encountering an error, return 0
+        return '0';
+      }
+    } else {
+      String s = "true";
       await writeFile(s);
       return s;
     }
@@ -192,6 +221,7 @@ class _NewsFeedState extends State<NewsFeed> {
 
   Future loadFeed() async {
     try {
+      await updateNewest();
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
@@ -223,6 +253,18 @@ class _NewsFeedState extends State<NewsFeed> {
     setState(() {
       _feed = feed;
     });
+  }
+
+  updateNewest() async {
+    String s = await readFileSettings();
+    print("siahgsbjsagduasjhdg");
+    print(s);
+    print("siahgsbjsagduasjhdg");
+    if (s == "true") {
+      isNewest = true;
+    } else {
+      isNewest = false;
+    }
   }
 
   String _now = '';
@@ -402,18 +444,55 @@ class _NewsFeedState extends State<NewsFeed> {
         body: Column(
           children: [
             Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                  onPressed: () => setState(() => isNewest = !isNewest),
-                  icon: RotatedBox(
-                    quarterTurns: 1,
-                    child: Icon(Icons.compare_arrows, size: 28),
-                  ),
-                  label: Text(
-                    isNewest ? 'Newest' : 'Oldest',
-                    style: TextStyle(fontSize: 16),
-                  )),
-            ),
+                alignment: Alignment.centerRight,
+                child: FutureBuilder(
+                  future: updateNewest(),
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return Center(child: CircularProgressIndicator());
+                      default:
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('An Unexpected Error has Occured'));
+                        } else {
+                          return Row(
+                            children: [
+                              TextButton.icon(
+                                  onPressed: () => {
+                                        setState(() {
+                                          print(isNewest);
+                                          isNewest = !isNewest;
+                                          writeFileSettings(
+                                              isNewest.toString());
+                                          print("================aaaaaaaaaa");
+                                          print(isNewest);
+                                        })
+                                      },
+                                  icon: RotatedBox(
+                                    quarterTurns: 1,
+                                    child: Icon(Icons.compare_arrows, size: 28),
+                                  ),
+                                  label: Text(
+                                    isNewest ? 'Newest' : 'Oldest',
+                                    style: TextStyle(fontSize: 16),
+                                  )),
+                              TextButton.icon(
+                                  onPressed: () => {setState(() {})},
+                                  icon: RotatedBox(
+                                    quarterTurns: 0,
+                                    child: Icon(Icons.delete, size: 28),
+                                  ),
+                                  label: Text(
+                                    'Delete Viewed',
+                                    style: TextStyle(fontSize: 16),
+                                  )),
+                            ],
+                          );
+                        }
+                    }
+                  },
+                )),
             Expanded(
                 child: FutureBuilder(
               future: loadFeed(),
