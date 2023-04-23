@@ -25,6 +25,8 @@ class NewsFeed extends StatefulWidget {
 class _NewsFeedState extends State<NewsFeed> {
   bool isNewest = true;
   late List<String> viewed;
+  List<RssItem> feed = [];
+  List<String> newsPage = [];
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -140,6 +142,19 @@ class _NewsFeedState extends State<NewsFeed> {
           ';,' +
           pubdate +
           "\n";
+    }
+    return sb;
+  }
+
+  convertRssFeedToStringList(List<RssItem> feed) {
+    String sb = '';
+
+    for (int i = 0; i < feed.length; i++) {
+      String title = feed[i].title ?? 'title';
+      String url = feed[i].link ?? 'url';
+      DateTime date = feed[i].pubDate!;
+      String pubdate = dateFormat.format(date);
+      sb = sb + newsPage[i] + ';,' + title + ';,' + url + ';,' + pubdate + "\n";
     }
     return sb;
   }
@@ -315,6 +330,66 @@ class _NewsFeedState extends State<NewsFeed> {
           },
         );
       },
+    );
+  }
+
+  addSavedFeedFromFile() async {
+    String history = await readFileSave();
+    List<String> newsWebsite = [];
+    await checkViewed();
+    print("=============");
+    print(history);
+    const splitter = LineSplitter();
+    final savedList = splitter.convert(history);
+    for (int i = 0; i < savedList.length; i++) {
+      final rssData = savedList[i].split(';,');
+      newsWebsite.add(rssData[0]);
+
+      RssItem temp = new RssItem(
+          author: '',
+          title: rssData[1],
+          link: rssData[2],
+          pubDate: DateTime.parse(rssData[3]));
+      feed.add(temp);
+      newsPage.add(rssData[0]);
+    }
+
+    for (int i = 0; i < feed.length; i++) {
+      if (newsWebsite[i] == widget.rss.newsTitle) {
+        for (int j = 0; j < viewed.length; j++) {
+          if (feed[i].link == viewed[j]) {
+            print("============");
+            print(newsPage[i]);
+            print(feed[i].link);
+            print(viewed[j]);
+            print("============");
+            feed.removeAt(i);
+            newsPage.removeAt(i);
+
+            continue;
+          }
+        }
+      }
+    }
+  }
+
+  deleteRead() async {
+    await addSavedFeedFromFile();
+    print("ToString...");
+    await writeFileSave(convertRssFeedToStringList(feed));
+    await writeFile("");
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Success!'),
+        content: const Text('Successfully cleared read articless'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'OK'),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 

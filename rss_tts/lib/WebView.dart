@@ -614,7 +614,7 @@ class _WebViewState extends State<WebView> {
       TTS[0].add(widget.feed.items![widget.index + index].title as String);
       for (String p in news) {
         p = p.replaceAll(RegExp(r"<\\?.*?>"), "");
-        p = p.replaceAll("&nbsp", " ");
+        p = p.replaceAll("&nbsp", "");
         p = p.replaceAll(";", " ");
         print(p);
         final pp = p.split('. ');
