@@ -55,7 +55,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
     } else {
       print("no exists");
       String s =
-          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
+          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false\n";
       await writeFile(s);
       return s;
     }

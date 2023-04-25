@@ -9,6 +9,7 @@ import 'package:rss_tts/ModifyRSS.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:rss_tts/delete.dart';
+import 'package:rss_tts/exportFile.dart';
 
 class SettingsPage extends StatefulWidget {
   static const keyDarkMode = 'key-dark-mode';
@@ -155,6 +156,14 @@ class _SettingsPageState extends State<SettingsPage> {
               .push(MaterialPageRoute(builder: (context) => delete())),
         );
 
+    Widget exportSettings() => SimpleSettingsTile(
+          title: 'Import/Export Settings',
+          subtitle: '',
+          leading: Icon(Icons.import_export),
+          onTap: () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => exportFile())),
+        );
+
     return Scaffold(
       drawer: NavBar(),
       appBar: AppBar(
@@ -177,6 +186,7 @@ class _SettingsPageState extends State<SettingsPage> {
             modifyRssSettings(),
             modifyTime(context),
             clearViewedCacheSettings(),
+            exportSettings(),
           ])
         ],
       )),

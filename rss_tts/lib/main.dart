@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:rss_tts/RSS_Feed.dart';
 import 'package:rss_tts/Settings.dart';
@@ -11,7 +12,9 @@ import 'dart:io' show Platform;
 
 Future main() async {
   await Settings.init(cacheProvider: SharePreferenceCache());
+  await Permission.notification.request();
   if (Platform.isAndroid) {
+    await FlutterBackground.hasPermissions;
     final androidConfig = FlutterBackgroundAndroidConfig(
       notificationTitle: "flutter_background example app",
       notificationText:
@@ -21,8 +24,6 @@ Future main() async {
           name: 'background_icon',
           defType: 'drawable'), // Default is ic_launcher from folder mipmap
     );
-    await FlutterBackground.hasPermissions;
-
     await FlutterBackground.initialize(androidConfig: androidConfig);
     await FlutterBackground.enableBackgroundExecution();
   }

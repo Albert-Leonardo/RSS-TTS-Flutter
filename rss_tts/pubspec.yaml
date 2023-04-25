@@ -49,6 +49,9 @@ dependencies:
   flutter_tts:
   workmanager:
   flutter_background:
+  share_plus:
+  file_picker:
+  permission_handler:
 
 dev_dependencies:
   flutter_test:

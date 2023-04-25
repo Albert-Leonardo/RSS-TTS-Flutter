@@ -478,7 +478,11 @@ class _NewsFeedState extends State<NewsFeed> {
                                     style: TextStyle(fontSize: 16),
                                   )),
                               TextButton.icon(
-                                  onPressed: () => {setState(() {})},
+                                  onPressed: () => {
+                                        setState(() {
+                                          deleteRead();
+                                        })
+                                      },
                                   icon: RotatedBox(
                                     quarterTurns: 0,
                                     child: Icon(Icons.delete, size: 28),
