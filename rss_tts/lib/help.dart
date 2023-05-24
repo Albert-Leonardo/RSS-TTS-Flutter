@@ -157,7 +157,7 @@ class AddRSS extends StatelessWidget {
 }
 
 class FAQs extends StatelessWidget {
-  final isDarkMode = Settings.getValue<bool>(SettingsPage.keyDarkMode, true);
+  final isDarkMode = true;
   FAQs({super.key});
   Widget build(BuildContext context) {
     return Scaffold(

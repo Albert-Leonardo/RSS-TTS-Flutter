@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Settings.getValue<bool>(SettingsPage.keyDarkMode, true);
+    final isDarkMode = true;
     return ValueChangeObserver<bool>(
       cacheKey: SettingsPage.keyDarkMode,
       defaultValue: true,
