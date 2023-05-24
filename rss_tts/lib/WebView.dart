@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -508,7 +509,7 @@ class _WebViewState extends State<WebView> {
         widget.updateIndex(ttsIndex);
         print("Index: " + ttsIndex.toString());
         print("TTSLENGTH: " + TTS[0].length.toString());
-        if (ttsIndex == TTS[0].length) {
+        if (ttsIndex == TTS[0].length && widget._visible1) {
           print("NEXT PAGE!!!!");
           if (widget.isNewest) {
             print("NEwest!!");
@@ -520,7 +521,10 @@ class _WebViewState extends State<WebView> {
           }
         }
 
-        if (canGoNext && ttsIndex == TTS[0].length && widget.rss.login) {
+        if (canGoNext &&
+            ttsIndex == TTS[0].length &&
+            widget.rss.login &&
+            widget._visible1) {
           print("iaugysufdchgvhjbhuoasy8dg7fyucgvhjbsad");
           if (widget.isNewest) {
             print("NEwest!!");
@@ -533,6 +537,7 @@ class _WebViewState extends State<WebView> {
         }
       } else if (checkPlay == false) {
         stopSpeak();
+        print("STop Speaking");
         break;
       }
     }
@@ -546,7 +551,7 @@ class _WebViewState extends State<WebView> {
         widget.updateIndex(ttsIndex);
         print("Index: " + ttsIndex.toString());
         print("TTSLENGTH: " + TTS[1].length.toString());
-        if (ttsIndex == TTS[1].length) {
+        if (ttsIndex == TTS[1].length && widget._visible2) {
           print("NEXT PAGE!!!!");
           if (widget.isNewest) {
             print("NEwest!!");
@@ -558,7 +563,10 @@ class _WebViewState extends State<WebView> {
           }
         }
 
-        if (canGoNext && ttsIndex == TTS[1].length && widget.rss.login) {
+        if (canGoNext &&
+            ttsIndex == TTS[1].length &&
+            widget.rss.login &&
+            widget._visible2) {
           print("iaugysufdchgvhjbhuoasy8dg7fyucgvhjbsad");
           if (widget.isNewest) {
             print("NEwest!!");
@@ -589,6 +597,7 @@ class _WebViewState extends State<WebView> {
   bool loadFinish = false;
   bool loadOnce = false;
   int mainPage = 0;
+  bool contPlay = false;
 
   queryString() {
     if (widget.rss.newsUrl.contains('aljazeera')) {
@@ -600,12 +609,13 @@ class _WebViewState extends State<WebView> {
   }
 
   Future getWebsiteData1(int index) async {
+    TTS[0] = [];
     if (!widget.rss.login) {
       final url = Uri.parse(
           stringConverter(widget.feed.items![widget.index + index].link));
       final response = await http.get(url);
       html[widget.index] = dom.Document.html(response.body);
-      print("SUccessss");
+      print("SUccessss1");
       final news = html[widget.index]
           .querySelectorAll(queryString())
           .map((e) => e.innerHtml.trim())
@@ -624,15 +634,17 @@ class _WebViewState extends State<WebView> {
     } else {
       TTS[0].add(widget.feed.items![widget.index].title as String);
     }
+    contPlay = true;
   }
 
   Future getWebsiteData2(int index) async {
+    TTS[1] = [];
     if (!widget.rss.login) {
       final url = Uri.parse(
           stringConverter(widget.feed.items![widget.index + index].link));
       final response = await http.get(url);
       html[widget.index] = dom.Document.html(response.body);
-      print("SUccessss");
+      print("SUccessss2");
       final news = html[widget.index]
           .querySelectorAll(queryString())
           .map((e) => e.innerHtml.trim())
@@ -651,6 +663,7 @@ class _WebViewState extends State<WebView> {
     } else {
       TTS[1].add(widget.feed.items![widget.index].title as String);
     }
+    contPlay = true;
   }
 
   int getIncrement() {
@@ -680,6 +693,37 @@ class _WebViewState extends State<WebView> {
       newResponse.add(p);
     }
     return newResponse;
+  }
+
+  checkContPlay() {
+    setState(() {
+      checkPlay = true;
+    });
+  }
+
+  checkLastEntry() {
+    if (widget.isNewest) {
+      if (!(widget.feed.items?.length == widget.index + 1)) {
+        print("FIRST ARTICLE");
+
+        getWebsiteData2(getIncrement());
+        return URLRequest(
+            url: Uri.parse(stringConverter(
+                widget.feed.items![widget.index + getIncrement()].link)));
+      } else {
+        return URLRequest(url: Uri.parse(stringConverter('')));
+      }
+    } else {
+      if (widget.index >= 1) {
+        print("LAST ARTICLE");
+        getWebsiteData2(getIncrement());
+        return URLRequest(
+            url: Uri.parse(stringConverter(
+                widget.feed.items![widget.index + getIncrement()].link)));
+      } else {
+        return URLRequest(url: Uri.parse(stringConverter('')));
+      }
+    }
   }
 
   double _progress = 0;
@@ -716,6 +760,7 @@ class _WebViewState extends State<WebView> {
                         int progress) async {
                       if (!widget.rss.login) {
                         if (TTS[0][0].isNotEmpty && startRSS) {
+                          print("START READINGGG");
                           checkPlay = true;
                           if (widget.continueBool) {
                             print("Continued!");
@@ -752,10 +797,14 @@ class _WebViewState extends State<WebView> {
                         print(TTS[0]);
                         print(TTS[1]);
                       });
-                      if (!widget.rss.login) {
+                      if (!widget.rss.login &&
+                          checkPlay == false &&
+                          widget._visible1) {
+                        print("PLease start reading");
                         checkPlay = true;
                         startRSS = true;
                         canGoNext = true;
+                        player1();
                       }
                       if (mainPage <= 4) {
                         if (widget.rss.login) {
@@ -784,6 +833,7 @@ class _WebViewState extends State<WebView> {
                           if (!loadOnce) loadOnce = !loadOnce;
                         }
                       }
+                      await checkContPlay();
                     },
                   ),
                   maintainState: true,
@@ -801,14 +851,11 @@ class _WebViewState extends State<WebView> {
                         crossPlatform: InAppWebViewOptions(
                             transparentBackground: true,
                             javaScriptEnabled: true)),
-                    initialUrlRequest: URLRequest(
-                        url: Uri.parse(stringConverter(widget
-                            .feed.items![widget.index + getIncrement()].link))),
+                    initialUrlRequest: checkLastEntry(),
                     onWebViewCreated:
                         (InAppWebViewController controller) async {
                       widget._controller2 = controller;
                       print("Lollllllllllll");
-                      await getWebsiteData2(getIncrement());
                     },
                     onProgressChanged: (InAppWebViewController controller,
                         int progress) async {
@@ -879,6 +926,7 @@ class _WebViewState extends State<WebView> {
                           if (!loadOnce) loadOnce = !loadOnce;
                         }
                       }
+                      checkContPlay();
                     },
                   ),
                   maintainState: true,
@@ -920,9 +968,10 @@ class _WebViewState extends State<WebView> {
                             onPressed: () async {
                               checkPlay = false;
 
-                              await player1();
-
-                              await player2();
+                              if (widget._visible1)
+                                player1();
+                              else
+                                player2();
                               if (ttsIndex >= 1) ttsIndex--;
                               checkPlay = true;
                               if (widget._visible1)
@@ -942,6 +991,7 @@ class _WebViewState extends State<WebView> {
                               onPressed: () {
                                 setState(() {
                                   checkPlay = !checkPlay;
+                                  contPlay = checkPlay;
                                   if (widget._visible1)
                                     player1();
                                   else
@@ -954,9 +1004,10 @@ class _WebViewState extends State<WebView> {
                             onPressed: () async {
                               checkPlay = false;
 
-                              await player1();
-
-                              await player2();
+                              if (widget._visible1)
+                                player1();
+                              else
+                                player2();
                               ttsIndex++;
                               widget.updateIndex(ttsIndex);
                               checkPlay = true;

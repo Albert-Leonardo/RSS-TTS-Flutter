@@ -237,8 +237,7 @@ class _NewsFeedState extends State<NewsFeed> {
         }
       }
       _saved = convertRssFeedToString(_feed) + _saved;
-      //_saved = convertRssFeedToString(_feed) + _saved;
-      //_saved = '';
+
       await writeFileSave(_saved);
 
       addSavedFeed();
@@ -267,6 +266,42 @@ class _NewsFeedState extends State<NewsFeed> {
     }
   }
 
+  removeRead(int x) {
+    return ListTile(
+      title: Text('Mark as unread'),
+      onTap: () async {
+        markUnread(x);
+        setState(() {
+          Navigator.pop(context, 'OK');
+        });
+      },
+    );
+  }
+
+  markUnread(int x) async {
+    viewed.removeWhere(
+        (element) => element.contains(_feed.items![x].link as String));
+    String convertBack = '';
+    for (int i = 0; i < viewed.length; i++) {
+      convertBack = convertBack + viewed[i] + '\n';
+    }
+    await writeFile(convertBack);
+  }
+
+  deleteArticlesBeforeThis(int x) async {
+    const splitter = LineSplitter();
+    final savedList = splitter.convert(_saved);
+    for (int i = x; i < _feed.items!.length; i++) {
+      savedList.removeWhere(
+          (element) => element.contains(_feed.items![i].title as String));
+    }
+    String convertBack = '';
+    for (int i = 0; i < savedList.length; i++) {
+      convertBack = convertBack + savedList[i] + '\n';
+    }
+    await writeFileSave(convertBack);
+  }
+
   String _now = '';
   late Timer _everySecond;
 
@@ -291,12 +326,10 @@ class _NewsFeedState extends State<NewsFeed> {
   }
 
   void _updateIndex(int index) {
-    setState(() {
-      widget.readingIndex = index;
-      print("Index = :::::");
-      print(index);
-      _now = DateTime.now().second.toString();
-    });
+    widget.readingIndex = index;
+    print("Index = :::::");
+    print(index);
+    _now = DateTime.now().second.toString();
   }
 
   newsTitle(title) {
@@ -333,6 +366,36 @@ class _NewsFeedState extends State<NewsFeed> {
             size: 30.0,
           ),
           contentPadding: EdgeInsets.all(5.0),
+          onLongPress: () {
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Additional Actions'),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      ListTile(
+                        title: Text('Delete articles before this'),
+                        onTap: () async {
+                          await deleteArticlesBeforeThis(index);
+                          setState(() {
+                            Navigator.pop(context, 'OK');
+                          });
+                        },
+                      ),
+                      if (viewed.contains(item.link)) removeRead(index),
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'OK'),
+                    child: const Text('Back'),
+                  ),
+                ],
+              ),
+            );
+          },
           onTap: () async {
             if (widget.reading == item.title) {
               print("Continued112");

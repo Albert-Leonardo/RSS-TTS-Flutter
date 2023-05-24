@@ -7,7 +7,7 @@ import Foundation
 
 import flutter_tts
 import path_provider_macos
-import share_plus
+import share_plus_macos
 import shared_preferences_macos
 import sqflite
 import url_launcher_macos
