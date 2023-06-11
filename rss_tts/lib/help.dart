@@ -246,6 +246,21 @@ class FAQs extends StatelessWidget {
                       endIndent: 5,
                     ),
                     const Text(
+                      "How to Login to a news website??",
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "- Open the settings -> Modify RSS Links -> edit the rss feed -> Tick checkbox for 'Website with login' -> Click confirm -> Redirect to website and login. ",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    const Divider(
+                      height: 25,
+                      thickness: 2,
+                      indent: 0,
+                      endIndent: 5,
+                    ),
+                    const Text(
                       "What do the checkboxes do in the 'Modify RSS' Option?",
                       style: TextStyle(fontSize: 25),
                     ),

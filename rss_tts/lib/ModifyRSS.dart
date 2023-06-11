@@ -8,7 +8,10 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:rss_tts/RSS_Feed.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:rss_tts/rss_mainmenu.dart';
+import 'package:rss_tts/WebViewLogin.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:webfeed/webfeed.dart';
+import 'package:http/http.dart' as http;
 
 List<newsRSS> rssList = [];
 
@@ -157,7 +160,49 @@ class _ModifyRSSState extends State<ModifyRSS> {
                       rssList[index].login = _checked;
                       nameController.clear();
                       urlController.clear();
+
                       Navigator.of(context).pop();
+                      if (_checked == true) {
+                        showDialog<void>(
+                          context: context,
+                          barrierDismissible: false, // user must tap button!
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Login to website'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: <Widget>[
+                                    Text(
+                                        'You have just added/edited a login RSS feed'),
+                                    Text('Would you like to login first??'),
+                                  ],
+                                ),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Yes'),
+                                  onPressed: () async {
+                                    RssFeed _feed;
+                                    final client = http.Client();
+                                    final response = await client
+                                        .get(Uri.parse(rssList[index].newsUrl));
+                                    _feed = RssFeed.parse(response.body);
+                                    print("LOLeksdee");
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                            builder: (context) => WebViewLogin(
+                                                  RSSLink: _feed.items![0].link
+                                                      as String,
+                                                  websiteName:
+                                                      rssList[index].newsTitle,
+                                                )));
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     },
                     child: Text('CONFIRM')),
               ],

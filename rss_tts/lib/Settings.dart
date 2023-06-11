@@ -10,6 +10,9 @@ import 'package:rss_tts/NavBar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:rss_tts/delete.dart';
 import 'package:rss_tts/exportFile.dart';
+import 'package:webfeed/domain/rss_feed.dart';
+import 'package:webfeed/webfeed.dart';
+import 'package:http/http.dart' as http;
 
 class SettingsPage extends StatefulWidget {
   static const keyDarkMode = 'key-dark-mode';
@@ -119,7 +122,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: Text('Edit RSS'),
                 actions: [
                   TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop();
                       },
                       child: Text('CONFIRM')),
