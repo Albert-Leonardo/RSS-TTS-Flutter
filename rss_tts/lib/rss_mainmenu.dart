@@ -15,11 +15,13 @@ class newsRSS {
   String newsUrl = '';
   bool enable = false;
   bool login = false;
-  newsRSS(a, b, c, d) {
+  String language = '';
+  newsRSS(a, b, c, d, e) {
     newsTitle = a;
     newsUrl = b;
     enable = c;
     login = d;
+    language = e;
   }
 }
 
@@ -84,7 +86,7 @@ class RSS_mainmenu extends StatelessWidget {
         if (contents == '') {
           print("no entry");
           String s =
-              "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
+              "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false,en-US\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true,en-US\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false,en-US\nMalaysiaKiniBM,https://www.malaysiakini.com/rss/my/news.rss,true,false,ms-MY";
           await writeFile(s);
           return s;
         }
@@ -97,7 +99,7 @@ class RSS_mainmenu extends StatelessWidget {
     } else {
       print("no exists");
       String s =
-          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
+          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false,en-US\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true,en-US\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false,en-US\nMalaysiaKiniBM,https://www.malaysiakini.com/rss/my/news.rss,true,false,ms-MY";
       await writeFile(s);
       return s;
     }
@@ -114,7 +116,8 @@ class RSS_mainmenu extends StatelessWidget {
           splitNames[0],
           splitNames[1],
           splitNames[2].toLowerCase() == 'true',
-          splitNames[3].toLowerCase() == 'true'));
+          splitNames[3].toLowerCase() == 'true',
+          splitNames[4]));
     }
   }
 

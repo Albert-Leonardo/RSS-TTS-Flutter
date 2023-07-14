@@ -23,6 +23,7 @@ class NewsFeed extends StatefulWidget {
 }
 
 class _NewsFeedState extends State<NewsFeed> {
+  late Map<String, double> languageSpeeds = {"Test": 0.5};
   late bool isNewest;
   late List<String> viewed;
   List<RssItem> feed = [];
@@ -48,6 +49,23 @@ class _NewsFeedState extends State<NewsFeed> {
     return File('$path/saved.txt');
   }
 
+  Future<File> get _localFileMark async {
+    final path = await _localPath;
+    return File('$path/mark.txt');
+  }
+
+  Future<File> get _localFileLanguage async {
+    final path = await _localPath;
+    return File('$path/language.txt');
+  }
+
+  Future<File> writeFileMark(String s) async {
+    final file = await _localFileMark;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
   Future<File> writeFile(String s) async {
     final file = await _localFile;
 
@@ -57,6 +75,13 @@ class _NewsFeedState extends State<NewsFeed> {
 
   Future<File> writeFileSettings(String s) async {
     final file = await _localFileSettings;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
+  Future<File> writeFileLanguage(String s) async {
+    final file = await _localFileLanguage;
 
     // Write the file
     return file.writeAsString(s);
@@ -98,7 +123,7 @@ class _NewsFeedState extends State<NewsFeed> {
       }
     } else {
       String s = "";
-      await writeFile(s);
+      await writeFileSave(s);
       return s;
     }
   }
@@ -115,6 +140,54 @@ class _NewsFeedState extends State<NewsFeed> {
       }
     } else {
       String s = "true";
+      await writeFileSettings(s);
+      return s;
+    }
+  }
+
+  Future<String> readFileLanguage() async {
+    File file = await _localFileLanguage;
+    if (await file.exists()) {
+      try {
+        String contents = await file.readAsString();
+        if (contents == "") {
+          String s =
+              "en-US,0.5;ms-MY,0.9;zh-TW,0.5;ko-KR,0.5;ja-JP,0.5;ru-RU,0.5;hu-HU,0.5;th-TH,0.5;nb-no,0.5;tr-TR,0.5;et-EE,0.5;sw,0.5;pt-PT,0.5;vi-VN,0.5;sv-VE,0.5;hi-IN,0.5;fr-FR,0.5;nl-NL,0.5;cs-CZ,0.5;pl-PL,0.5;fil-PH,0.5;it-IT,0.5;es-ES,0.5;";
+          await writeFileLanguage(s);
+          return s;
+        }
+        return contents;
+      } catch (e) {
+        // If encountering an error, return 0
+        return '0';
+      }
+    } else {
+      String s =
+          "en-US,0.5;ms-MY,0.9;zh-TW,0.5;ko-KR,0.5;ja-JP,0.5;ru-RU,0.5;hu-HU,0.5;th-TH,0.5;nb-no,0.5;tr-TR,0.5;et-EE,0.5;sw,0.5;pt-PT,0.5;vi-VN,0.5;sv-VE,0.5;hi-IN,0.5;fr-FR,0.5;nl-NL,0.5;cs-CZ,0.5;pl-PL,0.5;fil-PH,0.5;it-IT,0.5;es-ES,0.5;";
+      await writeFileLanguage(s);
+      String contents = await file.readAsString();
+
+      return s;
+    }
+  }
+
+  Future<String> readFileMark() async {
+    File file = await _localFileMark;
+    if (await file.exists()) {
+      try {
+        String contents = await file.readAsString();
+        if (contents == '') {
+          String s = "1";
+          await writeFile(s);
+          return s;
+        }
+        return contents;
+      } catch (e) {
+        // If encountering an error, return 0
+        return '0';
+      }
+    } else {
+      String s = "1";
       await writeFile(s);
       return s;
     }
@@ -137,7 +210,7 @@ class _NewsFeedState extends State<NewsFeed> {
 
   checkColor(RssItem item) {
     DateTime d1 = item.pubDate as DateTime;
-    DateTime d2 = DateTime.now().subtract(const Duration(days: 1));
+    DateTime d2 = DateTime.now().subtract(Duration(days: markDay));
 
     if (widget.reading == item.title) {
       return Color.fromARGB(255, 33, 227, 81);
@@ -194,6 +267,7 @@ class _NewsFeedState extends State<NewsFeed> {
   static const String loadingFeedMsg = 'Loading Feed. . .';
   static const String feedLoadErr = 'Error Loading Feed';
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+  int markDay = 1;
 
   updateTitle(title) {
     setState(() {
@@ -221,11 +295,14 @@ class _NewsFeedState extends State<NewsFeed> {
 
   Future loadFeed() async {
     try {
+      markDay = int.parse(await readFileMark());
       await updateNewest();
       final client = http.Client();
       final response = await client.get(Uri.parse(widget.rss.newsUrl));
       _feed = RssFeed.parse(response.body);
       await checkViewed();
+      print(viewed);
+      print("viewed:");
       _saved = await readFileSave();
 
       for (int i = 0; i < _feed.items!.length; i++) {
@@ -256,13 +333,22 @@ class _NewsFeedState extends State<NewsFeed> {
 
   updateNewest() async {
     String s = await readFileSettings();
-    print("siahgsbjsagduasjhdg");
-    print(s);
-    print("siahgsbjsagduasjhdg");
     if (s == "true") {
       isNewest = true;
     } else {
       isNewest = false;
+    }
+  }
+
+  updateSpeed() async {
+    String s2 = await readFileLanguage();
+    final languages = s2.split(";");
+    print(languages);
+    for (int i = 0; i < languages.length; i++) {
+      var mapData = languages[i].split(",");
+
+      languageSpeeds[mapData[0]] = double.parse(mapData[1]);
+      print(mapData);
     }
   }
 
@@ -311,7 +397,7 @@ class _NewsFeedState extends State<NewsFeed> {
     updateTitle(widget.rss.newsTitle);
     // sets first value
     _now = DateTime.now().second.toString();
-
+    updateSpeed();
     // defines a timer
   }
 
@@ -377,6 +463,8 @@ class _NewsFeedState extends State<NewsFeed> {
                       ListTile(
                         title: Text('Delete articles before this'),
                         onTap: () async {
+                          print(await readFile());
+                          print("HISTORY:");
                           await deleteArticlesBeforeThis(index);
                           setState(() {
                             Navigator.pop(context, 'OK');
@@ -412,6 +500,7 @@ class _NewsFeedState extends State<NewsFeed> {
                         updateIndex: _updateIndex,
                         readingIndex: readindex,
                         continueBool: true,
+                        languageSpeeds: languageSpeeds,
                       )));
             } else {
               _update(item.title as String);
@@ -426,10 +515,12 @@ class _NewsFeedState extends State<NewsFeed> {
                         updateIndex: _updateIndex,
                         readingIndex: 0,
                         continueBool: false,
+                        languageSpeeds: languageSpeeds,
                       )));
             }
             setState(() {
               viewed.add(item.link as String);
+              print("Added: ${item.link}");
               writeFile(writeViewed());
             });
           },
@@ -482,7 +573,6 @@ class _NewsFeedState extends State<NewsFeed> {
     await addSavedFeedFromFile();
     print("ToString...");
     await writeFileSave(convertRssFeedToStringList(feed));
-    await writeFile("");
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(

@@ -58,7 +58,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
     } else {
       print("no exists");
       String s =
-          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false\n";
+          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false,en-US\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true,en-US\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false,en-US\nMalaysiaKiniBM,https://www.malaysiakini.com/rss/my/news.rss,true,false,ms-MY";
       await writeFile(s);
       return s;
     }
@@ -75,15 +75,112 @@ class _ModifyRSSState extends State<ModifyRSS> {
           splitNames[0],
           splitNames[1],
           splitNames[2].toLowerCase() == 'true',
-          splitNames[3].toLowerCase() == 'true'));
+          splitNames[3].toLowerCase() == 'true',
+          splitNames[4]));
     }
+  }
+
+  checkLanguage(String s) {
+    if (s == 'English')
+      return 'en-US';
+    else if (s == 'Bahasa')
+      return 'ms-MY';
+    else if (s == 'Chinese')
+      return 'zh-TW';
+    else if (s == 'Korean')
+      return 'ko-KR';
+    else if (s == 'Japanese')
+      return 'ja-JP';
+    else if (s == 'Russian')
+      return 'ru-RU';
+    else if (s == 'Hungarian')
+      return 'hu-HU';
+    else if (s == 'Thai')
+      return 'th-TH';
+    else if (s == 'Norwegian Bokmal')
+      return 'nb-no';
+    else if (s == 'Turkish')
+      return 'tr-TR';
+    else if (s == 'Estonian')
+      return 'et-EE';
+    else if (s == 'Swahili')
+      return 'sw';
+    else if (s == 'Portuguese ')
+      return 'pt-PT';
+    else if (s == 'Vietnamese')
+      return 'vi-VN';
+    else if (s == 'Swedish')
+      return 'sv-VE';
+    else if (s == 'Hindi')
+      return 'hi-IN';
+    else if (s == 'French')
+      return 'fr-FR';
+    else if (s == 'Dutch')
+      return 'nl-NL';
+    else if (s == 'Czech')
+      return 'cs-CZ';
+    else if (s == 'Polish')
+      return 'pl-PL';
+    else if (s == 'Filipino')
+      return 'fil-PH';
+    else if (s == 'Italian')
+      return 'it-IT';
+    else if (s == 'Spanish') return 'es-ES';
+  }
+
+  checkLanguageBack(String s) {
+    if (s == 'en-US')
+      return 'English';
+    else if (s == 'ms-MY')
+      return 'Bahasa';
+    else if (s == 'zh-TW')
+      return 'Chinese';
+    else if (s == 'ko-KR')
+      return 'Korean';
+    else if (s == 'ja-JP')
+      return 'Japanese';
+    else if (s == 'ru-RU')
+      return 'Russian';
+    else if (s == 'hu-HU')
+      return 'Hungarian';
+    else if (s == 'th-TH')
+      return 'Thai';
+    else if (s == 'nb-no')
+      return 'Norwegian Bokmal';
+    else if (s == 'tr-TR')
+      return 'Turkish';
+    else if (s == 'et-EE')
+      return 'Estonian';
+    else if (s == 'sw')
+      return 'Swahili';
+    else if (s == 'pt-PT')
+      return 'Portuguese';
+    else if (s == 'vi-VN')
+      return 'Vietnamese';
+    else if (s == 'sv-VE')
+      return 'Swedish';
+    else if (s == 'hi-IN')
+      return 'Hindi';
+    else if (s == 'fr-FR')
+      return 'French';
+    else if (s == 'nl-NL')
+      return 'Dutch';
+    else if (s == 'cs-CZ')
+      return 'Czech';
+    else if (s == 'pl-PL')
+      return 'Polish';
+    else if (s == 'fil-PH')
+      return 'Filipino';
+    else if (s == 'it-IT')
+      return 'Italian';
+    else if (s == 'es-ES') return 'Spanish';
   }
 
   updateRssFile(List<newsRSS> rssList) async {
     String builder = '';
     for (int i = 0; i < rssList.length; i++) {
       builder +=
-          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()},${rssList[i].login.toString()}\n';
+          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()},${rssList[i].login.toString()},${rssList[i].language}\n';
     }
     print(builder);
 
@@ -91,6 +188,33 @@ class _ModifyRSSState extends State<ModifyRSS> {
   }
 
   Future editRssDialog(int index) async {
+    const List<String> list = <String>[
+      'English',
+      'Bahasa',
+      'Chinese',
+      'Korean',
+      'Japanese',
+      'Russian',
+      'Hungarian',
+      'Thai',
+      'Norwegian Bokmal',
+      'Turkish',
+      'Estonian',
+      'Swahili',
+      'Portuguese',
+      'Vietnamese',
+      'Swedish',
+      'Hindi',
+      'French',
+      'Dutch',
+      'Czech',
+      'Polish',
+      'Filipino',
+      'Italian',
+      'Spanish'
+    ];
+
+    String dropdownValue = checkLanguageBack(rssList[index].language);
     nameController.text = rssList[index].newsTitle;
     urlController.text = rssList[index].newsUrl;
     _checked = rssList[index].login;
@@ -99,7 +223,8 @@ class _ModifyRSSState extends State<ModifyRSS> {
         builder: (context) => AlertDialog(
               content: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
-                  return Column(mainAxisSize: MainAxisSize.min, children: [
+                  return SingleChildScrollView(
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -137,7 +262,34 @@ class _ModifyRSSState extends State<ModifyRSS> {
                         });
                       },
                     ),
-                  ]);
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Language:',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: DropdownButton<String>(
+                          value: dropdownValue,
+                          alignment: Alignment.centerLeft,
+                          onChanged: (String? value) {
+                            // This is called when the user selects an item.
+                            setState(() {
+                              dropdownValue = value!;
+                            });
+                          },
+                          items: list
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        )),
+                  ]));
                 },
               ),
               title: Text('Edit RSS'),
@@ -158,6 +310,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
                       rssList[index].newsTitle = nameController.text;
                       rssList[index].newsUrl = urlController.text;
                       rssList[index].login = _checked;
+                      rssList[index].language = checkLanguage(dropdownValue);
                       nameController.clear();
                       urlController.clear();
 
@@ -188,6 +341,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
                                         .get(Uri.parse(rssList[index].newsUrl));
                                     _feed = RssFeed.parse(response.body);
                                     print("LOLeksdee");
+                                    Navigator.pop(context);
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(
                                             builder: (context) => WebViewLogin(
@@ -269,7 +423,7 @@ class _ModifyRSSState extends State<ModifyRSS> {
             child: const Icon(Icons.add),
             onPressed: () {
               setState(() {
-                rssList.add(newsRSS('', '', true, false));
+                rssList.add(newsRSS('', '', true, false, 'en'));
                 updateRssFile(rssList);
               });
             },

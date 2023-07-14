@@ -100,7 +100,7 @@ class _exportFileState extends State<exportFile> {
     } else {
       print("no exists");
       String s =
-          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false";
+          "Aljazeera,https://www.aljazeera.com/xml/rss/all.xml,true,false,en-US\nMalaysiaKini,https://www.malaysiakini.com/rss/en/news.rss,true,true,en-US\nUnited Nations,https://news.un.org/feed/subscribe/en/news/all/rss.xml,true,false,en-US";
       await writeFile(s);
       return s;
     }
@@ -168,7 +168,8 @@ class _exportFileState extends State<exportFile> {
           splitNames[0],
           splitNames[1],
           splitNames[2].toLowerCase() == 'true',
-          splitNames[3].toLowerCase() == 'true'));
+          splitNames[3].toLowerCase() == 'true',
+          splitNames[4]));
     }
   }
 
@@ -176,7 +177,7 @@ class _exportFileState extends State<exportFile> {
     String builder = '';
     for (int i = 0; i < rssList.length; i++) {
       builder +=
-          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()},${rssList[i].login.toString()}\n';
+          '${rssList[i].newsTitle},${rssList[i].newsUrl},${rssList[i].enable.toString()},${rssList[i].login.toString()},${rssList[i].language}\n';
     }
     print(builder);
 

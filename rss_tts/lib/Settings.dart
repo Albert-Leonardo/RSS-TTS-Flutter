@@ -2,14 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rss_tts/ModifyRSS.dart';
 import 'package:rss_tts/NavBar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:rss_tts/delete.dart';
 import 'package:rss_tts/exportFile.dart';
+import 'package:rss_tts/language.dart';
 import 'package:webfeed/domain/rss_feed.dart';
 import 'package:webfeed/webfeed.dart';
 import 'package:http/http.dart' as http;
@@ -39,8 +42,20 @@ class _SettingsPageState extends State<SettingsPage> {
     return File('$path/saved.txt');
   }
 
+  Future<File> get _localFileMark async {
+    final path = await _localPath;
+    return File('$path/mark.txt');
+  }
+
   Future<File> writeFile(String s) async {
     final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString(s);
+  }
+
+  Future<File> writeFileMark(String s) async {
+    final file = await _localFileMark;
 
     // Write the file
     return file.writeAsString(s);
@@ -51,6 +66,28 @@ class _SettingsPageState extends State<SettingsPage> {
 
     // Write the file
     return file.writeAsString(s);
+  }
+
+  Future<String> readFileMark() async {
+    File file = await _localFileMark;
+    if (await file.exists()) {
+      try {
+        String contents = await file.readAsString();
+        if (contents == '') {
+          String s = "1";
+          await writeFile(s);
+          return s;
+        }
+        return contents;
+      } catch (e) {
+        // If encountering an error, return 0
+        return '0';
+      }
+    } else {
+      String s = "1";
+      await writeFile(s);
+      return s;
+    }
   }
 
   @override
@@ -90,44 +127,45 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     Future editOldTime(BuildContext context) async {
-      return showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                content: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Column(mainAxisSize: MainAxisSize.min, children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Days :',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      StatefulBuilder(
-                        builder: (context, state) => Center(
-                          child: Slider(
-                            value: _time,
-                            onChanged: (val) {
-                              state(() {
-                                _time = val;
-                              });
-                            },
-                          ),
-                        ),
-                      )
-                    ]);
-                  },
-                ),
-                title: Text('Edit RSS'),
-                actions: [
-                  TextButton(
-                      onPressed: () async {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('CONFIRM')),
+      int day = int.parse(await readFileMark());
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Mark Articles'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Mark articles older than a certain day as yellow (1-100)'),
+              TextFormField(
+                initialValue: day.toString(),
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(2),
+                  NumericalRangeFormatter(min: 1, max: 99),
                 ],
-              ));
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                    icon: Icon(Icons.calendar_today),
+                    hintText: "0-99",
+                    border: InputBorder.none),
+                onChanged: (String str) {
+                  day = int.parse(str);
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                print("test");
+                Navigator.pop(context, 'OK');
+
+                await writeFileMark(day.toString());
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
 
     Widget buildDarkMode() => SwitchSettingsTile(
@@ -167,6 +205,14 @@ class _SettingsPageState extends State<SettingsPage> {
               .push(MaterialPageRoute(builder: (context) => exportFile())),
         );
 
+    Widget languageSpeeds() => SimpleSettingsTile(
+          title: 'Change Language Speeds',
+          subtitle: '',
+          leading: Icon(Icons.language),
+          onTap: () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => language())),
+        );
+
     return Scaffold(
       drawer: NavBar(),
       appBar: AppBar(
@@ -190,7 +236,8 @@ class _SettingsPageState extends State<SettingsPage> {
             modifyTime(context),
             clearViewedCacheSettings(),
             exportSettings(),
-          ])
+          ]),
+          SettingsGroup(title: "Language", children: <Widget>[languageSpeeds()])
         ],
       )),
     );
